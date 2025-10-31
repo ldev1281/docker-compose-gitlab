@@ -25,7 +25,7 @@ services:
         registry['enable'] = true
         registry_external_url '${GITLAB_REGISTRY_URL}'
         registry_nginx['enable'] = true
-        registry_nginx['listen_port'] = {GITLAB_INTERNAL_REGISTRY_PORT}
+        registry_nginx['listen_port'] = ${GITLAB_INTERNAL_REGISTRY_PORT}
         registry_nginx['listen_https'] = false
     shm_size: "${GITLAB_SHM_SIZE}"
     volumes:

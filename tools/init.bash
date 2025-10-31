@@ -123,8 +123,8 @@ prompt_for_configuration() {
     read -p "GITLAB_REGISTRY_URL [${GITLAB_REGISTRY_URL:-https://registry.example.com}]: " input
     GITLAB_REGISTRY_URL=${input:-${GITLAB_REGISTRY_URL:-https://registry.example.com}}
 
-    read -p "GITLAB_INTERNAL_REGISTRY_PORT [${GITLAB_INTERNAL_REGISTRY_PORT:-5000}]: " input
-    GITLAB_INTERNAL_REGISTRY_PORT=${input:-${GITLAB_INTERNAL_REGISTRY_PORT:-5000}}
+    read -p "GITLAB_INTERNAL_REGISTRY_PORT [${GITLAB_INTERNAL_REGISTRY_PORT:-5005}]: " input
+    GITLAB_INTERNAL_REGISTRY_PORT=${input:-${GITLAB_INTERNAL_REGISTRY_PORT:-5005}}
 
 }
 
