@@ -126,6 +126,22 @@ prompt_for_configuration() {
     read -p "GITLAB_INTERNAL_REGISTRY_PORT [${GITLAB_INTERNAL_REGISTRY_PORT:-5005}]: " input
     GITLAB_INTERNAL_REGISTRY_PORT=${input:-${GITLAB_INTERNAL_REGISTRY_PORT:-5005}}
 
+    echo ""
+    echo "Authentik OIDC:"
+    read -p "GITLAB_AUTHENTIK_LABEL [${GITLAB_AUTHENTIK_LABEL:-Authentik}]: " input
+    GITLAB_AUTHENTIK_LABEL=${input:-${GITLAB_AUTHENTIK_LABEL:-Authentik}}
+
+    read -p "GITLAB_AUTHENTIK_URL [${GITLAB_AUTHENTIK_URL:-https://authentik.example.com}]: " input
+    GITLAB_AUTHENTIK_URL=${input:-${GITLAB_AUTHENTIK_URL:-https://authentik.example.com}}
+
+    read -p "GITLAB_AUTHENTIK_SLUG [${GITLAB_AUTHENTIK_SLUG:-gitlab}]: " input
+    GITLAB_AUTHENTIK_SLUG=${input:-${GITLAB_AUTHENTIK_SLUG:-gitlab}}
+
+    read -p "GITLAB_AUTHENTIK_CLIENT_ID [${GITLAB_AUTHENTIK_CLIENT_ID:-}]: " input
+    GITLAB_AUTHENTIK_CLIENT_ID=${input:-${GITLAB_AUTHENTIK_CLIENT_ID:-}}
+
+    read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
+    GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
 }
 
 # Display configuration and ask user to confirm
@@ -153,6 +169,13 @@ confirm_and_save_configuration() {
         "# Registry"
         "GITLAB_REGISTRY_URL=${GITLAB_REGISTRY_URL}"
         "GITLAB_INTERNAL_REGISTRY_PORT=${GITLAB_INTERNAL_REGISTRY_PORT}"
+        ""
+        "# Authentik OIDC"
+        "GITLAB_AUTHENTIK_LABEL=${GITLAB_AUTHENTIK_LABEL}"
+        "GITLAB_AUTHENTIK_URL=${GITLAB_AUTHENTIK_URL}"
+        "GITLAB_AUTHENTIK_SLUG=${GITLAB_AUTHENTIK_SLUG}"
+        "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
+        "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
     )
 
     echo ""
@@ -192,16 +215,18 @@ setup_containers() {
         fi
     fi
 
-    echo "Creating GitLab directories..."
-    mkdir -p "${VOL_DIR}/gitlab/etc" "${VOL_DIR}/gitlab/log" "${VOL_DIR}/gitlab/data"
-
     echo "Starting containers..."
     docker compose up -d
 
     echo "Waiting 20 seconds for services to initialize..."
     sleep 20
-    echo "Initial root password (if first run):"
     docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
+    echo ""
+    echo "By default, you can access GitLab at ${GITLAB_EXTERNAL_URL} and log in via Authentik."
+    echo "In case something goes wrong with the configuration or you need to log in as admin,"
+    echo "you can use the URL:"
+    echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
+    echo "to log in using the built-in authentication."
     echo ""
 }
 
