@@ -27,7 +27,7 @@ services:
 
         # ------------- Registry -------------
         registry['enable'] = true
-        registry_external_url '${GITLAB_REGISTRY_URL}'
+        registry_external_url 'https://${GITLAB_REGISTRY_URL}'
         registry_nginx['enable'] = true
         registry_nginx['listen_port'] = ${GITLAB_INTERNAL_REGISTRY_PORT}
         registry_nginx['listen_https'] = false
@@ -49,7 +49,7 @@ services:
               name: 'openid_connect',
               scope: ['openid','profile','email'],
               response_type: 'code',
-              issuer: '${GITLAB_AUTHENTIK_URL}/application/o/${GITLAB_AUTHENTIK_SLUG}/',
+              issuer: 'https://${GITLAB_AUTHENTIK_URL}/application/o/${GITLAB_AUTHENTIK_SLUG}/',
               discovery: true,
               uid_field: 'preferred_username',
               send_scope_to_token_endpoint: 'true',

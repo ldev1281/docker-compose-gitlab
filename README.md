@@ -49,10 +49,10 @@ Configuration Variables:
 | `GITLAB_SMTP_STARTTLS`           | Enable STARTTLS                                          | `true`                         |
 | `GITLAB_SMTP_TLS`                | Enable TLS                                               | `false`                        |
 | `GITLAB_EMAIL_DISPLAY_NAME`      | Display name for GitLab outgoing emails                  | `GitLab`                       |
-| `GITLAB_REGISTRY_URL`            | External URL for Docker Registry                         | `https://registry.example.com` |
+| `GITLAB_REGISTRY_URL`            | External URL for Docker Registry                         | `registry.example.com`         |
 | `GITLAB_INTERNAL_REGISTRY_PORT`  | Internal NGINX port for registry                         | `5005`                         |
 | `GITLAB_AUTHENTIK_LABEL`         | Display label for Authentik provider in GitLab SSO       | `Authentik`                    |
-| `GITLAB_AUTHENTIK_URL`           | Base URL of Authentik                                    | `https://authentik.example.com` |
+| `GITLAB_AUTHENTIK_URL`           | Base URL of Authentik                                    | `authentik.example.com`        |
 | `GITLAB_AUTHENTIK_SLUG`          | Authentik application slug                               | `gitlab`                       |
 | `GITLAB_AUTHENTIK_CLIENT_ID`     | OIDC client ID                                           | *(empty)*                      |
 | `GITLAB_AUTHENTIK_CLIENT_SECRET` | OIDC client secret                                       | *(empty)*                      |

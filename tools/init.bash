@@ -120,8 +120,8 @@ prompt_for_configuration() {
 
     echo ""
     echo "Registry:"
-    read -p "GITLAB_REGISTRY_URL [${GITLAB_REGISTRY_URL:-https://registry.example.com}]: " input
-    GITLAB_REGISTRY_URL=${input:-${GITLAB_REGISTRY_URL:-https://registry.example.com}}
+    read -p "GITLAB_REGISTRY_URL [${GITLAB_REGISTRY_URL:-registry.example.com}]: " input
+    GITLAB_REGISTRY_URL=${input:-${GITLAB_REGISTRY_URL:-registry.example.com}}
 
     read -p "GITLAB_INTERNAL_REGISTRY_PORT [${GITLAB_INTERNAL_REGISTRY_PORT:-5005}]: " input
     GITLAB_INTERNAL_REGISTRY_PORT=${input:-${GITLAB_INTERNAL_REGISTRY_PORT:-5005}}
@@ -131,8 +131,8 @@ prompt_for_configuration() {
     read -p "GITLAB_AUTHENTIK_LABEL [${GITLAB_AUTHENTIK_LABEL:-Authentik}]: " input
     GITLAB_AUTHENTIK_LABEL=${input:-${GITLAB_AUTHENTIK_LABEL:-Authentik}}
 
-    read -p "GITLAB_AUTHENTIK_URL [${GITLAB_AUTHENTIK_URL:-https://authentik.example.com}]: " input
-    GITLAB_AUTHENTIK_URL=${input:-${GITLAB_AUTHENTIK_URL:-https://authentik.example.com}}
+    read -p "GITLAB_AUTHENTIK_URL [${GITLAB_AUTHENTIK_URL:-authentik.example.com}]: " input
+    GITLAB_AUTHENTIK_URL=${input:-${GITLAB_AUTHENTIK_URL:-authentik.example.com}}
 
     read -p "GITLAB_AUTHENTIK_SLUG [${GITLAB_AUTHENTIK_SLUG:-gitlab}]: " input
     GITLAB_AUTHENTIK_SLUG=${input:-${GITLAB_AUTHENTIK_SLUG:-gitlab}}
@@ -228,6 +228,7 @@ setup_containers() {
     echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
     echo "to log in using the built-in authentication."
     echo ""
+    
 }
 
 # -----------------------------------
