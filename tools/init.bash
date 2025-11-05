@@ -77,11 +77,11 @@ prompt_for_configuration() {
 
     GITLAB_VERSION=${CURRENT_GITLAB_VERSION}
 
-    read -p "GITLAB_HOSTNAME [${GITLAB_HOSTNAME:-gitlab.example.com}]: " input
-    GITLAB_HOSTNAME=${input:-${GITLAB_HOSTNAME:-gitlab.example.com}}
+    read -p "GITLAB_APP_HOSTNAME [${GITLAB_APP_HOSTNAME:-gitlab.example.com}]: " input
+    GITLAB_APP_HOSTNAME=${input:-${GITLAB_APP_HOSTNAME:-gitlab.example.com}}
 
-    read -p "GITLAB_EXTERNAL_URL [${GITLAB_EXTERNAL_URL:-https://$GITLAB_HOSTNAME}]: " input
-    GITLAB_EXTERNAL_URL=${input:-${GITLAB_EXTERNAL_URL:-https://$GITLAB_HOSTNAME}}
+    read -p "GITLAB_EXTERNAL_URL [${GITLAB_EXTERNAL_URL:-https://$GITLAB_APP_HOSTNAME}]: " input
+    GITLAB_EXTERNAL_URL=${input:-${GITLAB_EXTERNAL_URL:-https://$GITLAB_APP_HOSTNAME}}
 
     read -p "GITLAB_SSH_PORT [${GITLAB_SSH_PORT:-22}]: " input
     GITLAB_SSH_PORT=${input:-${GITLAB_SSH_PORT:-22}}
@@ -149,7 +149,7 @@ confirm_and_save_configuration() {
     CONFIG_LINES=(
         "# GitLab"
         "GITLAB_VERSION=${GITLAB_VERSION}"
-        "GITLAB_HOSTNAME=${GITLAB_HOSTNAME}"
+        "GITLAB_APP_HOSTNAME=${GITLAB_APP_HOSTNAME}"
         "GITLAB_EXTERNAL_URL=${GITLAB_EXTERNAL_URL}"
         "GITLAB_SSH_PORT=${GITLAB_SSH_PORT}"
         "GITLAB_INTERNAL_HTTP_PORT=${GITLAB_INTERNAL_HTTP_PORT}"

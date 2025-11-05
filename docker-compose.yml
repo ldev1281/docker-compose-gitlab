@@ -3,7 +3,7 @@ services:
     image: gitlab/gitlab-ee:${GITLAB_VERSION}
     container_name: gitlab-app
     restart: unless-stopped
-    hostname: ${GITLAB_HOSTNAME}
+    hostname: ${GITLAB_APP_HOSTNAME}
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url '${GITLAB_EXTERNAL_URL}'

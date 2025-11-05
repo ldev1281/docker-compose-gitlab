@@ -35,7 +35,7 @@ Configuration Variables:
 | Variable Name                   | Description                                              | Default Value                  |
 |----------------------------------|----------------------------------------------------------|--------------------------------|
 | `GITLAB_VERSION`                 | GitLab EE Docker image version                           | `18.3.5-ee.0`                  |
-| `GITLAB_HOSTNAME`                | GitLab hostname                                          | `gitlab.example.com`           |
+| `GITLAB_APP_HOSTNAME`            | GitLab hostname                                          | `gitlab.example.com`           |
 | `GITLAB_EXTERNAL_URL`            | External URL of GitLab                                   | `https://gitlab.example.com`   |
 | `GITLAB_SSH_PORT`                | SSH port for GitLab Shell                                | `22`                           |
 | `GITLAB_INTERNAL_HTTP_PORT`      | Internal NGINX HTTP port                                 | `8182`                         |
