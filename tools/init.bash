@@ -201,7 +201,7 @@ confirm_and_save_configuration() {
 # Set up containers
 setup_containers() {
     echo "Stopping all containers and removing volumes..."
-    docker compose down -v || true
+    docker compose down -v
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
