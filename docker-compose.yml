@@ -6,6 +6,8 @@ services:
     hostname: ${GITLAB_APP_HOSTNAME}
     environment:
       GITLAB_OMNIBUS_CONFIG: |
+
+      
         external_url '${GITLAB_EXTERNAL_URL}'
         nginx['listen_port'] = ${GITLAB_INTERNAL_HTTP_PORT}
         nginx['listen_https'] = false
