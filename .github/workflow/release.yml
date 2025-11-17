@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Read CURRENT_GITLAB_VERSION
+        id: version
+        run: |
+          APP_VERSION=$(grep -oP '^CURRENT_GITLAB_VERSION="\K[^"]+' tools/init.bash)
+
+          if [ -z "$APP_VERSION" ]; then
+            echo "ERROR: failed to parse CURRENT_GITLAB_VERSION"
+            exit 1
+          fi
+
+          TAG="v$APP_VERSION"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists — skipping release."
+            exit 0
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        if: steps.version.outputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: false
