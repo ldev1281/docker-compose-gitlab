@@ -1,5 +1,13 @@
-name: Release
+name: Validate and Release
+env:
+  VERSION_VAR: CURRENT_GITLAB_VERSION
+  DOCKER_REPO: gitlab/gitlab-ee
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tools/init.bash'
   push:
     branches:
       - main
@@ -8,19 +16,41 @@ on:
 permissions:
   contents: write
 jobs:
+  validate-version:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Validate CURRENT version format and Docker tag
+        run: |
+          APP_VERSION=$(grep -oP "^${VERSION_VAR}=\"\K[^\"]+" tools/init.bash)
+          if [ -z "$APP_VERSION" ]; then
+            echo "::error::Failed to parse ${VERSION_VAR}"
+            exit 1
+          fi
+          URL="https://hub.docker.com/v2/repositories/${DOCKER_REPO}/tags/${APP_VERSION}"
+          echo "Checking if tag ${DOCKER_REPO}:${APP_VERSION} exists on Docker Hub..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Tag '${APP_VERSION}' not found for image '${DOCKER_REPO}' on Docker Hub (HTTP ${HTTP_CODE}). Check ${VERSION_VAR}."
+            exit 1
+          fi
+          echo "OK: Image ${DOCKER_REPO}:${APP_VERSION} exists on Docker Hub."
   release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Check out
         uses: actions/checkout@v4
       - name: Fetch tags
         run: git fetch --tags
-      - name: Read CURRENT_GITLAB_VERSION
+      - name: Read version and prepare tag
         id: version
         run: |
-          APP_VERSION=$(grep -oP '^CURRENT_GITLAB_VERSION="\K[^"]+' tools/init.bash)
+          APP_VERSION=$(grep -oP "^${VERSION_VAR}=\"\K[^\"]+" tools/init.bash)
           if [ -z "$APP_VERSION" ]; then
-            echo "ERROR: failed to parse CURRENT_GITLAB_VERSION"
+            echo "ERROR: failed to parse ${VERSION_VAR}"
             exit 1
           fi
           TAG="v$APP_VERSION"
@@ -29,7 +59,7 @@ jobs:
             exit 0
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-      - name: Create Release
+      - name: Create GitHub Release
         if: steps.version.outputs.tag != ''
         uses: softprops/action-gh-release@v2
         env:
