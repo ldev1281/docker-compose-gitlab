@@ -18,6 +18,8 @@ BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.5-ee.0"
 
+
+
 check_requirements() {
     missed_tools=()
     for cmd in $REQUIRED_TOOLS; do
