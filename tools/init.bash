@@ -16,7 +16,7 @@ REQUIRED_TOOLS="docker limbo-backup.bash"
 REQUIRED_NETS="proxy-client-gitlab"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
-CURRENT_GITLAB_VERSION="18.3.4-ee.0"
+CURRENT_GITLAB_VERSION="18.3.8-ee.0"
 
 
 check_requirements() {
