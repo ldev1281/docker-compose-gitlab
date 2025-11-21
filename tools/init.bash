@@ -23,6 +23,9 @@ CURRENT_GITLAB_VERSION="18.6.0-ee.0"
 
 
 
+
+
+
 check_requirements() {
     missed_tools=()
     for cmd in $REQUIRED_TOOLS; do
