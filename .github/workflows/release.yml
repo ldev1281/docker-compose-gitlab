@@ -5,6 +5,12 @@ env:
   ARCHIVE_NAME: ${{ github.event.repository.name }}
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: false
+        default: ''
   pull_request:
     branches:
       - main
@@ -47,7 +53,7 @@ jobs:
           echo "OK: Image ${DOCKER_REPO}:${APP_VERSION} exists on Docker Hub."
 
   release:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Check out
@@ -65,7 +71,7 @@ jobs:
             exit 1
           fi
 
-          TAG="v$APP_VERSION"
+          TAG="$APP_VERSION"
 
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists — skipping release."
@@ -87,10 +93,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ steps.version.outputs.tag }}
+          tag_name: ${{ github.event.inputs.tag || steps.version.outputs.tag }}
+          name: ${{ github.event.inputs.tag || steps.version.outputs.tag }}
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
           files: |
             ${{ env.ARCHIVE_NAME }}.tar.gz
+
