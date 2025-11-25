@@ -4,15 +4,34 @@ This repository provides a production-ready Docker Compose configuration for dep
 
 ## Setup Instructions
 
-### 1. Clone the Repository
+### 1. Download and Extract the Release
 
-Clone the project to your server in the `/docker/gitlab/` directory:
+Download the packaged release to your server into the `/docker/gitlab/` directory and extract it there.
+
+Create the target directory and enter it:
 
 ```bash
 mkdir -p /docker/gitlab
 cd /docker/gitlab
-git clone https://github.com/ldev1281/docker-compose-gitlab.git .
 ```
+
+You can either download the **latest** release:
+
+```bash
+curl -fsSL "https://github.com/ldev1281/docker-compose-gitlab/releases/latest/download/docker-compose-gitlab.tar.gz" -o /tmp/docker-compose-gitlab.tar.gz
+tar xzf /tmp/docker-compose-gitlab.tar.gz -C /docker/gitlab
+rm -f /tmp/docker-compose-gitlab.tar.gz
+```
+
+Or download a **specific** release (for example `18.3.5-ee.0`):
+
+```bash
+curl -fsSL "https://github.com/ldev1281/docker-compose-gitlab/releases/download/18.3.5-ee.0/docker-compose-gitlab.tar.gz" -o /tmp/docker-compose-gitlab.tar.gz
+tar xzf /tmp/docker-compose-gitlab.tar.gz -C /docker/gitlab
+rm -f /tmp/docker-compose-gitlab.tar.gz
+```
+
+After extraction, the contents of the archive should be located directly in `/docker/gitlab/` (next to `docker-compose.yml`).
 
 ### 2. Create Docker Network and Set Up Reverse Proxy
 
