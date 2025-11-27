@@ -23,10 +23,10 @@ tar xzf /tmp/docker-compose-gitlab.tar.gz -C /docker/gitlab
 rm -f /tmp/docker-compose-gitlab.tar.gz
 ```
 
-Or download a **specific** release (for example `18.3.5-ee.0`):
+Or download a **specific** release (for example `18.3.6-ee.0`):
 
 ```bash
-curl -fsSL "https://github.com/ldev1281/docker-compose-gitlab/releases/download/18.3.5-ee.0/docker-compose-gitlab.tar.gz" -o /tmp/docker-compose-gitlab.tar.gz
+curl -fsSL "https://github.com/ldev1281/docker-compose-gitlab/releases/download/18.3.6-ee.0/docker-compose-gitlab.tar.gz" -o /tmp/docker-compose-gitlab.tar.gz
 tar xzf /tmp/docker-compose-gitlab.tar.gz -C /docker/gitlab
 rm -f /tmp/docker-compose-gitlab.tar.gz
 ```
