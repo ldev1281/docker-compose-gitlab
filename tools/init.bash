@@ -18,6 +18,10 @@ BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
 
+# GitLab Runner config directory and file
+RUNNER_CONFIG_DIR="${SCRIPT_DIR}/../gitlab-runner-config"
+RUNNER_CONFIG_FILE="${RUNNER_CONFIG_DIR}/config.toml"
+
 check_requirements() {
     missed_tools=()
     for cmd in $REQUIRED_TOOLS; do
@@ -142,6 +146,27 @@ prompt_for_configuration() {
 
     read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
     GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
+
+    echo ""
+    echo "GitLab Runner:"
+
+    if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
+        echo "Runner registration will be skipped."
+        if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
+            COMPOSE_PROFILES="gitlab-runner"
+        fi
+    else
+        read -p "Register GitLab Runner on this host? (y/N): " input
+        case "$input" in
+            y|Y)
+                COMPOSE_PROFILES="gitlab-runner"
+                ;;
+            *)
+                COMPOSE_PROFILES=""
+                ;;
+        esac
+    fi
 }
 
 # Display configuration and ask user to confirm
@@ -176,6 +201,9 @@ confirm_and_save_configuration() {
         "GITLAB_AUTHENTIK_SLUG=${GITLAB_AUTHENTIK_SLUG}"
         "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
         "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
+        ""
+        "# Docker Compose profiles"
+        "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
     )
 
     echo ""
@@ -196,6 +224,30 @@ confirm_and_save_configuration() {
     printf "%s\n" "${CONFIG_LINES[@]}" >"$ENV_FILE"
     echo ".env file saved to $ENV_FILE"
     echo ""
+}
+
+maybe_register_runner() {
+    if [[ "${COMPOSE_PROFILES:-}" != "gitlab-runner" ]]; then
+        echo "GitLab Runner is disabled in configuration. Skipping runner registration."
+        return 0
+    fi
+
+    if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo "GitLab Runner config already exists at $RUNNER_CONFIG_FILE. Skipping runner registration."
+        return 0
+    fi
+
+    echo ""
+    echo "GitLab Runner config not found at: $RUNNER_CONFIG_FILE"
+    echo "Starting interactive GitLab Runner registration..."
+    echo "Config directory: $RUNNER_CONFIG_DIR"
+    echo ""
+
+    mkdir -p "$RUNNER_CONFIG_DIR"
+
+    docker run --rm -it \
+      -v "${RUNNER_CONFIG_DIR}:/etc/gitlab-runner" \
+      gitlab/gitlab-runner:latest register
 }
 
 # Set up containers
@@ -247,5 +299,5 @@ prompt_for_configuration
 confirm_and_save_configuration
 create_networks
 create_backup_tasks
+maybe_register_runner
 setup_containers
-
