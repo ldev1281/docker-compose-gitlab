@@ -163,7 +163,7 @@ prompt_for_configuration() {
         echo "Would you like to enable and register GitLab Runner?"
 
         while :; do
-            read -p "Enable GitLab Runner? (y/n): " CONFIRM
+            read -p "Register GitLab Runner? (y/n): " CONFIRM
 
             [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
             [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
@@ -173,8 +173,8 @@ prompt_for_configuration() {
 
         if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" ]]; then
             echo ""
-            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
-            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
+            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-none}]: " input
+            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-none}}
         fi
     fi
 }
