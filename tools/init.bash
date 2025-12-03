@@ -153,19 +153,23 @@ prompt_for_configuration() {
     if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
         echo "Runner registration will be skipped."
+
         if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
             COMPOSE_PROFILES="gitlab-runner"
         fi
     else
-        read -p "Register GitLab Runner on this host? (y/N): " input
-        case "$input" in
-            y|Y)
-                COMPOSE_PROFILES="gitlab-runner"
-                ;;
-            *)
-                COMPOSE_PROFILES=""
-                ;;
-        esac
+        echo ""
+        echo "GitLab Runner is not registered (config.toml not found)."
+        echo "Would you like to enable and register GitLab Runner?"
+
+        while :; do
+            read -p "Enable GitLab Runner? (y/n): " CONFIRM
+
+            [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
+            [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
+
+            echo "Please type y or n."
+        done
     fi
 }
 
@@ -226,7 +230,8 @@ confirm_and_save_configuration() {
     echo ""
 }
 
-maybe_register_runner() {
+register_runner() {
+
     if [[ "${COMPOSE_PROFILES:-}" != "gitlab-runner" ]]; then
         echo "GitLab Runner is disabled in configuration. Skipping runner registration."
         return 0
@@ -237,17 +242,39 @@ maybe_register_runner() {
         return 0
     fi
 
+    if [[ -z "${GITLAB_RUNNER_TOKEN:-}" ]]; then
+        echo "GITLAB_RUNNER_TOKEN is not set in .env. Cannot register GitLab Runner."
+        echo "Please add GITLAB_RUNNER_TOKEN to .env and re-run init.bash."
+        return 1
+    fi
+
+    if [[ -z "${GITLAB_EXTERNAL_URL:-}" ]]; then
+        echo "GITLAB_EXTERNAL_URL is not set. Cannot register GitLab Runner."
+        return 1
+    fi
+
     echo ""
     echo "GitLab Runner config not found at: $RUNNER_CONFIG_FILE"
-    echo "Starting interactive GitLab Runner registration..."
+    echo "Starting non-interactive GitLab Runner registration..."
     echo "Config directory: $RUNNER_CONFIG_DIR"
     echo ""
 
     mkdir -p "$RUNNER_CONFIG_DIR"
 
-    docker run --rm -it \
+    docker run --rm \
       -v "${RUNNER_CONFIG_DIR}:/etc/gitlab-runner" \
-      gitlab/gitlab-runner:latest register
+      gitlab/gitlab-runner:latest register --non-interactive \
+        --url "${GITLAB_EXTERNAL_URL}" \
+        --registration-token "${GITLAB_RUNNER_TOKEN}" \
+        --executor "docker" \
+        --docker-image "docker:27" \
+        --description "gitlab-docker-runner" \
+        --docker-privileged \
+        --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+        --docker-volumes "/cache"
+
+    echo ""
+    echo "GitLab Runner registration finished."
 }
 
 # Set up containers
@@ -280,7 +307,6 @@ setup_containers() {
     echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
     echo "to log in using the built-in authentication."
     echo ""
-    
 }
 
 # -----------------------------------
@@ -299,5 +325,5 @@ prompt_for_configuration
 confirm_and_save_configuration
 create_networks
 create_backup_tasks
-maybe_register_runner
+register_runner
 setup_containers
