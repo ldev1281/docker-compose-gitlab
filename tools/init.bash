@@ -216,7 +216,7 @@ confirm_and_save_configuration() {
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
         ""
         "# GitLab Runner"
-        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-}"
     )
 
     echo ""
