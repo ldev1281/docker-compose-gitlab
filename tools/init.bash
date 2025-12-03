@@ -333,5 +333,5 @@ prompt_for_configuration
 confirm_and_save_configuration
 create_networks
 create_backup_tasks
-register_runner
 setup_containers
+register_runner
