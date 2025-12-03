@@ -19,7 +19,7 @@ BACKUP_TASKS="10-gitlab.conf.bash"
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
 
 # GitLab Runner config directory and file
-RUNNER_CONFIG_DIR="${SCRIPT_DIR}/../gitlab-runner-config"
+RUNNER_CONFIG_DIR="${VOL_DIR}/gitlab-runner"
 RUNNER_CONFIG_FILE="${RUNNER_CONFIG_DIR}/config.toml"
 
 check_requirements() {
@@ -170,6 +170,12 @@ prompt_for_configuration() {
 
             echo "Please type y or n."
         done
+
+        if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" ]]; then
+            echo ""
+            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
+            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
+        fi
     fi
 }
 
@@ -208,6 +214,9 @@ confirm_and_save_configuration() {
         ""
         "# Docker Compose profiles"
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
+        ""
+        "# GitLab Runner"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}"
     )
 
     echo ""
