@@ -77,7 +77,7 @@ services:
     restart: unless-stopped
     profiles: ["gitlab-runner"]
     volumes:
-      - ./gitlab-runner-config:/etc/gitlab-runner
+      - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - proxy-client-gitlab
