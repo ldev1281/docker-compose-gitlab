@@ -160,7 +160,7 @@ prompt_for_configuration() {
     else
         echo ""
         echo "GitLab Runner is not registered (config.toml not found)."
-        echo "Would you like to enable and register GitLab Runner?"
+        echo "Would you like to register GitLab Runner?"
 
         while :; do
             read -p "Register GitLab Runner? (y/n): " CONFIRM
@@ -173,8 +173,8 @@ prompt_for_configuration() {
 
         if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" ]]; then
             echo ""
-            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-none}]: " input
-            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-none}}
+            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
+            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
         fi
     fi
 }
@@ -263,7 +263,6 @@ register_runner() {
     fi
 
     echo ""
-    echo "GitLab Runner config not found at: $RUNNER_CONFIG_FILE"
     echo "Starting non-interactive GitLab Runner registration..."
     echo "Config directory: $RUNNER_CONFIG_DIR"
     echo ""
