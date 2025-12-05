@@ -268,7 +268,7 @@ register_runner() {
     echo ""
 
     mkdir -p "$RUNNER_CONFIG_DIR"
-
+    sleep 120
     docker run --rm \
       -v "${RUNNER_CONFIG_DIR}:/etc/gitlab-runner" \
       gitlab/gitlab-runner:latest register --non-interactive \
