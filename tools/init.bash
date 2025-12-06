@@ -239,52 +239,6 @@ confirm_and_save_configuration() {
     echo ""
 }
 
-register_runner() {
-
-    if [[ "${COMPOSE_PROFILES:-}" != "gitlab-runner" ]]; then
-        echo "GitLab Runner is disabled in configuration. Skipping runner registration."
-        return 0
-    fi
-
-    if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
-        echo "GitLab Runner config already exists at $RUNNER_CONFIG_FILE. Skipping runner registration."
-        return 0
-    fi
-
-    if [[ -z "${GITLAB_RUNNER_TOKEN:-}" ]]; then
-        echo "GITLAB_RUNNER_TOKEN is not set in .env. Cannot register GitLab Runner."
-        echo "Please add GITLAB_RUNNER_TOKEN to .env and re-run init.bash."
-        return 1
-    fi
-
-    if [[ -z "${GITLAB_EXTERNAL_URL:-}" ]]; then
-        echo "GITLAB_EXTERNAL_URL is not set. Cannot register GitLab Runner."
-        return 1
-    fi
-
-    echo ""
-    echo "Starting non-interactive GitLab Runner registration..."
-    echo "Config directory: $RUNNER_CONFIG_DIR"
-    echo ""
-
-    mkdir -p "$RUNNER_CONFIG_DIR"
-    sleep 120
-    docker run --rm \
-      -v "${RUNNER_CONFIG_DIR}:/etc/gitlab-runner" \
-      gitlab/gitlab-runner:latest register --non-interactive \
-        --url "${GITLAB_EXTERNAL_URL}" \
-        --registration-token "${GITLAB_RUNNER_TOKEN}" \
-        --executor "docker" \
-        --docker-image "docker:27" \
-        --description "gitlab-docker-runner" \
-        --docker-privileged \
-        --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
-        --docker-volumes "/cache"
-
-    echo ""
-    echo "GitLab Runner registration finished."
-}
-
 # Set up containers
 setup_containers() {
     echo "Stopping all containers and removing volumes..."
@@ -292,7 +246,7 @@ setup_containers() {
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
-        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data."
+        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         read -p "Clear it now? (y/N): " CONFIRM
         echo ""
@@ -334,4 +288,3 @@ confirm_and_save_configuration
 create_networks
 create_backup_tasks
 setup_containers
-register_runner
