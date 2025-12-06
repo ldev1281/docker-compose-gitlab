@@ -18,6 +18,10 @@ BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
 
+# GitLab Runner config directory and file
+RUNNER_CONFIG_DIR="${VOL_DIR}/gitlab-runner"
+RUNNER_CONFIG_FILE="${RUNNER_CONFIG_DIR}/config.toml"
+
 check_requirements() {
     missed_tools=()
     for cmd in $REQUIRED_TOOLS; do
@@ -142,6 +146,37 @@ prompt_for_configuration() {
 
     read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
     GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
+
+    echo ""
+    echo "GitLab Runner:"
+
+    if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
+        echo "Runner registration will be skipped."
+
+        if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
+            COMPOSE_PROFILES="gitlab-runner"
+        fi
+    else
+        echo ""
+        echo "GitLab Runner is not registered (config.toml not found)."
+        echo "Would you like to register GitLab Runner?"
+
+        while :; do
+            read -p "Register GitLab Runner? (y/n): " CONFIRM
+
+            [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
+            [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
+
+            echo "Please type y or n."
+        done
+
+        if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" ]]; then
+            echo ""
+            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
+            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
+        fi
+    fi
 }
 
 # Display configuration and ask user to confirm
@@ -176,6 +211,12 @@ confirm_and_save_configuration() {
         "GITLAB_AUTHENTIK_SLUG=${GITLAB_AUTHENTIK_SLUG}"
         "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
         "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
+        ""
+        "# Docker Compose profiles"
+        "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
+        ""
+        "# GitLab Runner"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-}"
     )
 
     echo ""
@@ -205,7 +246,7 @@ setup_containers() {
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
-        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data."
+        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         read -p "Clear it now? (y/N): " CONFIRM
         echo ""
@@ -228,7 +269,6 @@ setup_containers() {
     echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
     echo "to log in using the built-in authentication."
     echo ""
-    
 }
 
 # -----------------------------------
@@ -248,4 +288,3 @@ confirm_and_save_configuration
 create_networks
 create_backup_tasks
 setup_containers
-
