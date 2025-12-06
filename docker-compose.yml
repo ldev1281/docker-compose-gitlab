@@ -77,7 +77,7 @@ services:
       - gitlab-runner
     depends_on:
       gitlab-app:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
     entrypoint: ["/bin/sh", "-lc"]
@@ -105,7 +105,7 @@ services:
       - gitlab-runner
     depends_on:
       gitlab-app:
-        condition: service_started
+        condition: service_healthy
       gitlab-runner-register:
         condition: service_completed_successfully
     volumes:
