@@ -73,13 +73,6 @@ services:
     networks:
       - proxy-client-gitlab
 
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/gitlab/bin/gitlab-ctl status >/dev/null 2>&1 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
-
   gitlab-runner-register:
     image: gitlab/gitlab-runner:latest
     profiles:
