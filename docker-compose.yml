@@ -88,18 +88,19 @@ services:
         condition: service_healthy
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: ["/bin/sh", "-lc"]
     command: >
       if [ ! -f /etc/gitlab-runner/config.toml ]; then
         echo "No config.toml, registering GitLab Runner...";
-        gitlab-runner register --non-interactive
-          --url="${GITLAB_EXTERNAL_URL}"
-          --registration-token="${GITLAB_RUNNER_TOKEN}"
-          --executor="docker"
-          --docker-image="docker:27"
-          --description="gitlab-docker-runner"
-          --docker-privileged
-          --docker-volumes="/var/run/docker.sock:/var/run/docker.sock"
+        gitlab-runner register --non-interactive \
+          --url="${GITLAB_EXTERNAL_URL}" \
+          --registration-token="${GITLAB_RUNNER_TOKEN}" \
+          --executor="docker" \
+          --docker-image="docker:27" \
+          --description="gitlab-docker-runner" \
+          --docker-privileged \
+          --docker-volumes="/var/run/docker.sock:/var/run/docker.sock" \
           --docker-volumes="/cache";
       else
         echo "config.toml already exists, skip registration.";
