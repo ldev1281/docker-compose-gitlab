@@ -168,14 +168,7 @@ prompt_for_configuration() {
             [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
             [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
 
-            echo "Please type y or n."
-        done
-
-        if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" ]]; then
-            echo ""
-            read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
-            GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
-        fi
+            echo "Please type y or n."        done
     fi
 }
 
@@ -256,19 +249,61 @@ setup_containers() {
         fi
     fi
 
-    echo "Starting containers..."
-    docker compose up -d
+    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo ""
+        echo "GitLab Runner is not registered yet."
+        echo "GitLab will be started first, so you can retrieve the registration token."
+        echo ""
 
-    echo "Waiting 20 seconds for services to initialize..."
-    sleep 20
-    docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
-    echo ""
-    echo "By default, you can access GitLab at ${GITLAB_EXTERNAL_URL} and log in via Authentik."
-    echo "In case something goes wrong with the configuration or you need to log in as admin,"
-    echo "you can use the URL:"
-    echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
-    echo "to log in using the built-in authentication."
-    echo ""
+        echo "Starting gitlab-app container..."
+        docker compose up -d gitlab-app
+
+        echo "Waiting 20 seconds for services to initialize..."
+        sleep 20
+        docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
+        echo ""
+        echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
+        echo "If you need to use the built-in admin login, open:"
+        echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
+        echo ""
+        echo ""
+        echo "Open the following URL in your browser:"
+        echo "  ${GITLAB_EXTERNAL_URL}"
+        echo "Then go to:"
+        echo "  ${GITLAB_EXTERNAL_URL}/admin/runners"
+        echo "to retrieve the GitLab Runner registration token."
+        echo ""
+
+        read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
+        GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
+        export GITLAB_RUNNER_TOKEN
+
+        if grep -q '^GITLAB_RUNNER_TOKEN=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_TOKEN=.*|GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}" >> "$ENV_FILE"
+        fi
+
+        echo ""
+        echo "Registration token saved into .env"
+        echo "Continuing with full container startup..."
+        echo ""
+        docker compose up -d
+
+    else
+        echo "Starting all containers..."
+
+        docker compose up -d
+
+        echo "Waiting 20 seconds for services to initialize..."
+        sleep 20
+        docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
+        echo ""
+        echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
+        echo "If you need to use the built-in admin login, open:"
+        echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
+        echo ""
+    fi
 }
 
 # -----------------------------------
