@@ -1,6 +1,7 @@
 # GitLab Docker Compose Deployment (with Caddy Reverse Proxy)
 
-This repository provides a production-ready Docker Compose configuration for deploying Gitlab-ee — a self-hosted DevOps platform for managing repositories, CI/CD pipelines, and container registries. Authentik OIDC integration for single sign-on.
+This repository provides a production-ready Docker Compose configuration for deploying Gitlab-ee — a self-hosted DevOps platform for managing repositories, CI/CD pipelines, and container registries. Authentik OIDC integration for single sign-on.  
+**Optional GitLab Runner support is included.**
 
 ## Setup Instructions
 
@@ -37,11 +38,12 @@ After extraction, the contents of the archive should be located directly in `/do
 
 This project integrates with the reverse proxy configuration provided by [`docker-compose-proxy-client`](https://github.com/ldev1281/docker-compose-proxy-client). Follow these steps:
 
-1. **Create the shared Docker network** (if it doesn’t already exist):
+1. **Create the shared Docker networks** (if they don’t already exist):
 
-   ```bash
-   docker network create --driver bridge --internal proxy-client-gitlab
-   ```
+```bash
+docker network create --driver bridge --internal proxy-client-gitlab || true
+docker network create --driver bridge --internal proxy-client-gitlab-runner || true
+```
 
 2. **Set up the Caddy reverse proxy** according to the instructions in [`docker-compose-proxy-client`](https://github.com/ldev1281/docker-compose-proxy-client).
 
@@ -51,30 +53,33 @@ Once Caddy is running, it will automatically route requests to the GitLab contai
 
 Configuration Variables:
 
-| Variable Name                   | Description                                              | Default Value                  |
-|----------------------------------|----------------------------------------------------------|--------------------------------|
-| `GITLAB_VERSION`                 | GitLab EE Docker image version                           | `18.3.5-ee.0`                  |
-| `GITLAB_APP_HOSTNAME`            | GitLab hostname                                          | `gitlab.example.com`           |
-| `GITLAB_EXTERNAL_URL`            | External URL of GitLab                                   | `https://gitlab.example.com`   |
-| `GITLAB_SSH_PORT`                | SSH port for GitLab Shell                                | `22`                           |
-| `GITLAB_INTERNAL_HTTP_PORT`      | Internal NGINX HTTP port                                 | `8182`                         |
-| `GITLAB_SHM_SIZE`                | Shared memory size for the container                     | `256m`                         |
-| `GITLAB_SMTP_ENABLE`             | Enable SMTP                                              | `true`                         |
-| `GITLAB_SMTP_HOST`               | SMTP server host                                         | `smtp.mailgun.org`             |
-| `GITLAB_SMTP_PORT`               | SMTP port                                                | `587`                          |
-| `GITLAB_SMTP_USERNAME`           | SMTP username                                            | `gitlab@sandbox123.mailgun.org` |
-| `GITLAB_SMTP_PASSWORD`           | SMTP password                                            | `password`                     |
-| `GITLAB_SMTP_AUTH`               | SMTP authentication method (`plain/login/cram_md5`)      | `login`                        |
-| `GITLAB_SMTP_STARTTLS`           | Enable STARTTLS                                          | `true`                         |
-| `GITLAB_SMTP_TLS`                | Enable TLS                                               | `false`                        |
-| `GITLAB_EMAIL_DISPLAY_NAME`      | Display name for GitLab outgoing emails                  | `GitLab`                       |
-| `GITLAB_REGISTRY_URL`            | External URL for Docker Registry                         | `registry.example.com`         |
-| `GITLAB_INTERNAL_REGISTRY_PORT`  | Internal NGINX port for registry                         | `5005`                         |
-| `GITLAB_AUTHENTIK_LABEL`         | Display label for Authentik provider in GitLab SSO       | `Authentik`                    |
-| `GITLAB_AUTHENTIK_URL`           | Base URL of Authentik                                    | `authentik.example.com`        |
-| `GITLAB_AUTHENTIK_SLUG`          | Authentik application slug                               | `gitlab`                       |
-| `GITLAB_AUTHENTIK_CLIENT_ID`     | OIDC client ID                                           | *(empty)*                      |
-| `GITLAB_AUTHENTIK_CLIENT_SECRET` | OIDC client secret                                       | *(empty)*                      |
+| Variable Name                    | Description                                                | Default Value                   |
+|----------------------------------|------------------------------------------------------------|---------------------------------|
+| `GITLAB_VERSION`                 | GitLab EE Docker image version                             | `18.3.6-ee.0`                   |
+| `GITLAB_RUNNER_VERSION`          | GitLab Runner Docker image version                         | `v18.3.1`                       |
+| `COMPOSE_PROFILES`               | Enable GitLab Runner by setting `gitlab-runner`            | *(empty)*                       |
+| `GITLAB_APP_HOSTNAME`            | GitLab hostname                                            | `gitlab.example.com`            |
+| `GITLAB_EXTERNAL_URL`            | External URL of GitLab                                     | `https://gitlab.example.com`    |
+| `GITLAB_SSH_PORT`                | SSH port for GitLab Shell                                  | `22`                            |
+| `GITLAB_INTERNAL_HTTP_PORT`      | Internal NGINX HTTP port                                   | `8182`                          |
+| `GITLAB_SHM_SIZE`                | Shared memory size for the container                       | `256m`                          |
+| `GITLAB_SMTP_ENABLE`             | Enable SMTP                                                | `true`                          |
+| `GITLAB_SMTP_HOST`               | SMTP server host                                           | `smtp.mailgun.org`              |
+| `GITLAB_SMTP_PORT`               | SMTP port                                                  | `587`                           |
+| `GITLAB_SMTP_USERNAME`           | SMTP username                                              | `gitlab@sandbox123.mailgun.org` |
+| `GITLAB_SMTP_PASSWORD`           | SMTP password                                              | `password`                      |
+| `GITLAB_SMTP_AUTH`               | SMTP authentication method (`plain/login/cram_md5`)        | `login`                         |
+| `GITLAB_SMTP_STARTTLS`           | Enable STARTTLS                                            | `true`                          |
+| `GITLAB_SMTP_TLS`                | Enable TLS                                                 | `false`                         |
+| `GITLAB_EMAIL_DISPLAY_NAME`      | Display name for GitLab outgoing emails                    | `GitLab`                        |
+| `GITLAB_REGISTRY_URL`            | External URL for Docker Registry                           | `registry.example.com`          |
+| `GITLAB_INTERNAL_REGISTRY_PORT`  | Internal NGINX port for registry                           | `5005`                          |
+| `GITLAB_AUTHENTIK_LABEL`         | Display label for Authentik provider in GitLab SSO         | `Authentik`                     |
+| `GITLAB_AUTHENTIK_URL`           | Base URL of Authentik                                      | `authentik.example.com`         |
+| `GITLAB_AUTHENTIK_SLUG`          | Authentik application slug                                 | `gitlab`                        |
+| `GITLAB_AUTHENTIK_CLIENT_ID`     | OIDC client ID                                             | *(empty)*                       |
+| `GITLAB_AUTHENTIK_CLIENT_SECRET` | OIDC client secret                                         | *(empty)*                       |
+| `GITLAB_RUNNER_TOKEN`            | GitLab Runner registration token (requested automatically) | *(empty)*                       |
 
 To configure and launch the stack, run the provided script:
 
@@ -88,7 +93,12 @@ The script will:
 - Generate the `.env` file.
 - Optionally clear existing data volumes.
 - Create the necessary directories with correct permissions.
-- Start the containers and wait for initialization.
+- Start the GitLab service.
+- **If GitLab Runner is enabled and the Runner is not yet registered:**
+  - Start `gitlab-app` only.
+  - Prompt you to open `/admin/runners` to obtain the registration token.
+  - Request `GITLAB_RUNNER_TOKEN` and save it to `.env`.
+  - Start the full stack including GitLab Runner.
 
 > **Important:** Keep your `.env` file secure and back it up for future redeployments.
 
@@ -120,7 +130,9 @@ GitLab uses the following bind-mounted volumes for configuration, logs, and data
 
 - `./vol/gitlab/etc`  — Omnibus configuration 
 - `./vol/gitlab/log`  — Logs 
-- `./vol/gitlab/data` — Data
+- `./vol/gitlab/data` — Data  
+- `./vol/gitlab-runner/` — GitLab Runner configuration (`config.toml`)
+
 ---
 
 ### Example Directory Structure
@@ -135,10 +147,9 @@ GitLab uses the following bind-mounted volumes for configuration, logs, and data
 │       └── rsync.conf.d/
 │           └── 10-gitlab.conf.bash
 ├── vol/
-│   └── gitlab/
-│       ├── etc/
-│       ├── log/
-│       └── data/
+│   ├── gitlab/
+│   └── gitlab-runner/
+│       └── config.toml
 ├── .env
 ```
 
@@ -159,6 +170,7 @@ CMD_AFTER_BACKUP="docker compose --project-directory /docker/gitlab up -d"
 CMD_BEFORE_RESTORE="docker compose --project-directory /docker/gitlab down || true"
 CMD_AFTER_RESTORE=(
   "docker network create --driver bridge --internal proxy-client-gitlab || true"
+  "docker network create --driver bridge --internal proxy-client-gitlab-runner || true"
   "docker compose --project-directory /docker/gitlab up -d"
 )
 

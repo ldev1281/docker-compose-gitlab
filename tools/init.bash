@@ -13,7 +13,7 @@ BACKUP_TASKS_SRC_DIR="${SCRIPT_DIR}/../etc/limbo-backup/rsync.conf.d"
 BACKUP_TASKS_DST_DIR="/etc/limbo-backup/rsync.conf.d"
 
 REQUIRED_TOOLS="docker limbo-backup.bash"
-REQUIRED_NETS="proxy-client-gitlab"
+REQUIRED_NETS="proxy-client-gitlab proxy-client-gitlab-runner"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
