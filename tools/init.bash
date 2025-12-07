@@ -170,6 +170,7 @@ prompt_for_configuration() {
 
             echo "Please type y or n."
         done
+    fi
 }
 
 # Display configuration and ask user to confirm
