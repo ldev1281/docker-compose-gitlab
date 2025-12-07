@@ -100,6 +100,9 @@ services:
       - "--docker-privileged"
       - "--docker-volumes=/var/run/docker.sock:/var/run/docker.sock"
       - "--docker-volumes=/cache"
+    volumes:
+      - ./vol/gitlab-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
 
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
