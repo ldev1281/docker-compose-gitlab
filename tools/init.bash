@@ -168,8 +168,8 @@ prompt_for_configuration() {
             [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
             [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
 
-            echo "Please type y or n."        done
-    fi
+            echo "Please type y or n."
+        done
 }
 
 # Display configuration and ask user to confirm
