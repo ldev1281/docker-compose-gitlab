@@ -80,7 +80,7 @@ services:
       - proxy-client-gitlab
 
   gitlab-runner-register:
-    image: gitlab/gitlab-runner:latest
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     profiles:
       - gitlab-runner
     depends_on:
@@ -103,9 +103,11 @@ services:
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy-client-gitlab-runner
 
   gitlab-runner:
-    image: gitlab/gitlab-runner:latest
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     container_name: gitlab-runner
     restart: unless-stopped
     profiles:
@@ -118,8 +120,14 @@ services:
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy-client-gitlab-runner
 
 networks:
   proxy-client-gitlab:
     name: proxy-client-gitlab
+    external: true
+
+  proxy-client-gitlab-runner:
+    name: proxy-client-gitlab-runner
     external: true

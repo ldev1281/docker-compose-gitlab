@@ -17,6 +17,7 @@ REQUIRED_NETS="proxy-client-gitlab"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
+CURRENT_GITLAB_RUNNER_VERSION="v18.3.1"
 
 # GitLab Runner config directory and file
 RUNNER_CONFIG_DIR="${VOL_DIR}/gitlab-runner"
@@ -80,6 +81,8 @@ prompt_for_configuration() {
     echo ""
 
     GITLAB_VERSION=${CURRENT_GITLAB_VERSION}
+
+    GITLAB_RUNNER_VERSION=${CURRENT_GITLAB_RUNNER_VERSION}
 
     read -p "GITLAB_APP_HOSTNAME [${GITLAB_APP_HOSTNAME:-gitlab.example.com}]: " input
     GITLAB_APP_HOSTNAME=${input:-${GITLAB_APP_HOSTNAME:-gitlab.example.com}}
@@ -210,6 +213,7 @@ confirm_and_save_configuration() {
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
         ""
         "# GitLab Runner"
+        "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
         "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-}"
     )
 
