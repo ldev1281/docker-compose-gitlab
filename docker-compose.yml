@@ -89,6 +89,8 @@ services:
     environment:
       GITLAB_EXTERNAL_URL: "${GITLAB_EXTERNAL_URL}"
       GITLAB_RUNNER_TOKEN: "${GITLAB_RUNNER_TOKEN}"
+      http_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
+      https_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}    
     entrypoint: ["gitlab-runner", "register"]
     command:
       - "--non-interactive"
@@ -110,6 +112,8 @@ services:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     container_name: gitlab-runner
     restart: unless-stopped
+      http_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
+      https_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
     profiles:
       - gitlab-runner
     depends_on:
