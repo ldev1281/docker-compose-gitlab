@@ -112,6 +112,7 @@ services:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     container_name: gitlab-runner
     restart: unless-stopped
+    environment:
       http_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
       https_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
     profiles:
