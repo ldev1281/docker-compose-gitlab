@@ -214,8 +214,8 @@ confirm_and_save_configuration() {
         ""
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
-        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-}"
-        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-}"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-empty}"
+        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-empty}"
     )
 
     echo ""
