@@ -214,7 +214,7 @@ confirm_and_save_configuration() {
         ""
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
-        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-}"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-}"
         "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-}"
     )
 
@@ -279,10 +279,6 @@ setup_containers() {
         echo "  ${GITLAB_EXTERNAL_URL}/admin/runners"
         echo "to retrieve the GitLab Runner registration token."
         echo ""
-
-        read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
-        GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
-        export GITLAB_RUNNER_TOKEN
 
         if grep -q '^GITLAB_RUNNER_TOKEN=' "$ENV_FILE"; then
             sed -i "s|^GITLAB_RUNNER_TOKEN=.*|GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}|" "$ENV_FILE"
