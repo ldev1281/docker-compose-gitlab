@@ -214,8 +214,8 @@ confirm_and_save_configuration() {
         ""
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
-        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-empty}"
-        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-empty}"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-pending}"
+        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-pending}"
     )
 
     echo ""
@@ -262,10 +262,10 @@ setup_containers() {
         echo ""
 
         echo "Starting gitlab-app container..."
-        docker compose up -d gitlab-app
+        docker compose up  gitlab-app --wait
 
-        echo "Waiting 20 seconds for services to initialize..."
-        sleep 20
+        echo "Waiting for Gitlab service to initialize..."
+        
         docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
         echo ""
         echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
@@ -305,15 +305,13 @@ setup_containers() {
         echo "Registration token saved into .env"
         echo "Continuing with full container startup..."
         echo ""
-        docker compose up -d
-
+        docker compose up --wait
+        echo "Waiting for all services to initialize..."
     else
         echo "Starting all containers..."
-
-        docker compose up -d
-
-        echo "Waiting 20 seconds for services to initialize..."
-        sleep 20
+        echo ""
+        docker compose up --wait
+        echo "Waiting for all services to initialize..."
         docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
         echo ""
         echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
