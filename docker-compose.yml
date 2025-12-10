@@ -69,10 +69,69 @@ services:
       - ./vol/gitlab/log:/var/log/gitlab
       - ./vol/gitlab/data:/var/opt/gitlab
 
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:${GITLAB_INTERNAL_HTTP_PORT}/-/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+
     networks:
-      - proxy-client-gitlab
+      proxy-client-gitlab:
+      gitlab-private:
+        aliases:
+          - ${GITLAB_APP_HOSTNAME}
+
+  gitlab-runner-register:
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
+    profiles:
+      - gitlab-runner
+    depends_on:
+      gitlab-app:
+        condition: service_healthy
+    environment:
+      GITLAB_EXTERNAL_URL: "${GITLAB_EXTERNAL_URL}"
+      GITLAB_RUNNER_TOKEN: "${GITLAB_RUNNER_TOKEN}"
+    entrypoint: ["gitlab-runner", "register"]
+    command:
+      - "--non-interactive"
+      - "--url= http://${GITLAB_APP_HOSTNAME}:${GITLAB_INTERNAL_HTTP_PORT}"
+      - "--token=${GITLAB_RUNNER_TOKEN}"
+      - "--executor=docker"
+      - "--docker-image=docker:27"
+      - "--description=gitlab-docker-runner"
+      - "--docker-privileged"
+      - "--docker-volumes=/var/run/docker.sock:/var/run/docker.sock"
+      - "--docker-volumes=/cache"
+    volumes:
+      - ./vol/gitlab-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab-private
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
+    container_name: gitlab-runner
+    restart: unless-stopped
+    profiles:
+      - gitlab-runner
+    depends_on:
+      gitlab-app:
+        condition: service_healthy
+      gitlab-runner-register:
+        condition: service_completed_successfully
+    volumes:
+      - ./vol/gitlab-runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab-private
 
 networks:
+  gitlab-private:
+    name: gitlab-private
+    driver: bridge
+    internal: true
+
   proxy-client-gitlab:
     name: proxy-client-gitlab
     external: true

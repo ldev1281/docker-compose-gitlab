@@ -17,6 +17,11 @@ REQUIRED_NETS="proxy-client-gitlab"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
+CURRENT_GITLAB_RUNNER_VERSION="v18.3.1"
+
+# GitLab Runner config directory and file
+RUNNER_CONFIG_DIR="${VOL_DIR}/gitlab-runner"
+RUNNER_CONFIG_FILE="${RUNNER_CONFIG_DIR}/config.toml"
 
 check_requirements() {
     missed_tools=()
@@ -76,6 +81,8 @@ prompt_for_configuration() {
     echo ""
 
     GITLAB_VERSION=${CURRENT_GITLAB_VERSION}
+
+    GITLAB_RUNNER_VERSION=${CURRENT_GITLAB_RUNNER_VERSION}
 
     read -p "GITLAB_APP_HOSTNAME [${GITLAB_APP_HOSTNAME:-gitlab.example.com}]: " input
     GITLAB_APP_HOSTNAME=${input:-${GITLAB_APP_HOSTNAME:-gitlab.example.com}}
@@ -142,6 +149,31 @@ prompt_for_configuration() {
 
     read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
     GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
+
+    echo ""
+    echo "GitLab Runner:"
+
+    if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
+        echo "Runner registration will be skipped."
+
+        if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
+            COMPOSE_PROFILES="gitlab-runner"
+        fi
+    else
+        echo ""
+        echo "GitLab Runner is not registered (config.toml not found)."
+        echo "Would you like to register GitLab Runner?"
+
+        while :; do
+            read -p "Register GitLab Runner? (y/n): " CONFIRM
+
+            [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
+            [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
+
+            echo "Please type y or n."
+        done
+    fi
 }
 
 # Display configuration and ask user to confirm
@@ -176,6 +208,13 @@ confirm_and_save_configuration() {
         "GITLAB_AUTHENTIK_SLUG=${GITLAB_AUTHENTIK_SLUG}"
         "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
         "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
+        ""
+        "# Docker Compose profiles"
+        "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
+        ""
+        "# GitLab Runner"
+        "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
+        "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-pending}"
     )
 
     echo ""
@@ -205,7 +244,7 @@ setup_containers() {
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
-        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data."
+        echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         read -p "Clear it now? (y/N): " CONFIRM
         echo ""
@@ -215,20 +254,58 @@ setup_containers() {
         fi
     fi
 
-    echo "Starting containers..."
-    docker compose up -d
+    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo ""
+        echo "GitLab Runner is not registered yet."
+        echo "GitLab will be started first, so you can retrieve the registration token."
+        echo ""
 
-    echo "Waiting 20 seconds for services to initialize..."
-    sleep 20
-    docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
-    echo ""
-    echo "By default, you can access GitLab at ${GITLAB_EXTERNAL_URL} and log in via Authentik."
-    echo "In case something goes wrong with the configuration or you need to log in as admin,"
-    echo "you can use the URL:"
-    echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
-    echo "to log in using the built-in authentication."
-    echo ""
-    
+        echo "Starting gitlab-app container..."
+        echo "Waiting for Gitlab service to initialize..."        
+        docker compose up  gitlab-app --wait
+
+        docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
+        echo ""
+        echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
+        echo "If you need to use the built-in admin login, open:"
+        echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
+        echo ""
+        echo ""
+        echo "Open the following URL in your browser:"
+        echo "  ${GITLAB_EXTERNAL_URL}"
+        echo "Then go to:"
+        echo "  ${GITLAB_EXTERNAL_URL}/admin/runners"
+        echo "to retrieve the GitLab Runner registration token."
+        echo ""
+        
+        read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
+        GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
+        export GITLAB_RUNNER_TOKEN
+
+        if grep -q '^GITLAB_RUNNER_TOKEN=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_TOKEN=.*|GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}" >> "$ENV_FILE"
+        fi
+
+        echo ""
+        echo "Registration token saved into .env"
+        echo "Continuing with full container startup..."     
+        echo ""
+        docker compose up --wait
+
+    else
+        echo "Starting all containers..."
+        echo ""
+        docker compose up --wait
+
+        docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
+        echo ""
+        echo "By default, GitLab is available at ${GITLAB_EXTERNAL_URL} and supports Authentik login."
+        echo "If you need to use the built-in admin login, open:"
+        echo "${GITLAB_EXTERNAL_URL}/users/sign_in?auto_sign_in=false"
+        echo ""
+    fi
 }
 
 # -----------------------------------
@@ -248,4 +325,3 @@ confirm_and_save_configuration
 create_networks
 create_backup_tasks
 setup_containers
-
