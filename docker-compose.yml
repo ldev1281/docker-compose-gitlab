@@ -77,7 +77,10 @@ services:
       start_period: 120s
 
     networks:
-      - proxy-client-gitlab
+      proxy-client-gitlab:
+      gitlab-private:
+        aliases:
+          - ${GITLAB_APP_HOSTNAME}
 
   gitlab-runner-register:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
@@ -89,8 +92,6 @@ services:
     environment:
       GITLAB_EXTERNAL_URL: "${GITLAB_EXTERNAL_URL}"
       GITLAB_RUNNER_TOKEN: "${GITLAB_RUNNER_TOKEN}"
-      http_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
-      https_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}    
     entrypoint: ["gitlab-runner", "register"]
     command:
       - "--non-interactive"
@@ -106,15 +107,12 @@ services:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - proxy-client-gitlab-runner
+      - gitlab-private
 
   gitlab-runner:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     container_name: gitlab-runner
     restart: unless-stopped
-    environment:
-      http_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
-      https_proxy: socks5h://proxy-client-gitlab-runner:${PROXY_SOCKS5H_PORT:-}
     profiles:
       - gitlab-runner
     depends_on:
@@ -126,13 +124,14 @@ services:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - proxy-client-gitlab-runner
+      - gitlab-private
 
 networks:
+  gitlab-private:
+    name: gitlab-private
+    driver: bridge
+    internal: true
+
   proxy-client-gitlab:
     name: proxy-client-gitlab
-    external: true
-
-  proxy-client-gitlab-runner:
-    name: proxy-client-gitlab-runner
     external: true

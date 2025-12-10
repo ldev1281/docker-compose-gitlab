@@ -13,7 +13,7 @@ BACKUP_TASKS_SRC_DIR="${SCRIPT_DIR}/../etc/limbo-backup/rsync.conf.d"
 BACKUP_TASKS_DST_DIR="/etc/limbo-backup/rsync.conf.d"
 
 REQUIRED_TOOLS="docker limbo-backup.bash"
-REQUIRED_NETS="proxy-client-gitlab proxy-client-gitlab-runner"
+REQUIRED_NETS="proxy-client-gitlab"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
 CURRENT_GITLAB_VERSION="18.3.6-ee.0"
@@ -215,7 +215,6 @@ confirm_and_save_configuration() {
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
         "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-pending}"
-        "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT:-pending}"
     )
 
     echo ""
@@ -287,17 +286,6 @@ setup_containers() {
             sed -i "s|^GITLAB_RUNNER_TOKEN=.*|GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}|" "$ENV_FILE"
         else
             echo "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN}" >> "$ENV_FILE"
-        fi
-
-        echo "socks5h port for proxy:"
-        read -p "PROXY_SOCKS5H_PORT [${PROXY_SOCKS5H_PORT:-1080}]: " input
-        PROXY_SOCKS5H_PORT=${input:-${PROXY_SOCKS5H_PORT:-1080}}
-        export PROXY_SOCKS5H_PORT
-
-        if grep -q '^PROXY_SOCKS5H_PORT=' "$ENV_FILE"; then
-          sed -i "s|^PROXY_SOCKS5H_PORT=.*|PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT}|" "$ENV_FILE"
-        else
-           echo "PROXY_SOCKS5H_PORT=${PROXY_SOCKS5H_PORT}" >> "$ENV_FILE"
         fi
 
         echo ""
