@@ -95,7 +95,7 @@ services:
     entrypoint: ["gitlab-runner", "register"]
     command:
       - "--non-interactive"
-      - "--url=${GITLAB_EXTERNAL_URL}"
+      - "--url= http://${GITLAB_APP_HOSTNAME}"
       - "--token=${GITLAB_RUNNER_TOKEN}"
       - "--executor=docker"
       - "--docker-image=docker:27"

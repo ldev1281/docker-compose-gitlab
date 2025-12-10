@@ -38,10 +38,10 @@ After extraction, the contents of the archive should be located directly in `/do
 
 This project integrates with the reverse proxy configuration provided by [`docker-compose-proxy-client`](https://github.com/ldev1281/docker-compose-proxy-client). Follow these steps:
 
-1. **Create the shared Docker networks** (if they don’t already exist):
+1. **Create the shared Docker network** (if it doesn’t already exist):
 
 ```bash
-docker network create --driver bridge --internal proxy-client-gitlab || true
+docker network create --driver bridge --internal proxy-client-gitlab
 ```
 
 2. **Set up the Caddy reverse proxy** according to the instructions in [`docker-compose-proxy-client`](https://github.com/ldev1281/docker-compose-proxy-client).
