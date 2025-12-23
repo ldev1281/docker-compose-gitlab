@@ -63,6 +63,50 @@ services:
             }
           }
         ]
+
+        # ------------- Object Storage (S3) -------------
+        gitlab_rails['object_store']['enabled'] = true
+        gitlab_rails['object_store']['proxy_download'] = false
+
+        # uploads
+        gitlab_rails['object_store']['objects']['uploads'] = {
+          'bucket' => '${GITLAB_S3_UPLOADS_BUCKET}',
+          'connection' => {
+            'provider' => 'AWS',
+            'region' => '${GITLAB_S3_REGION}',
+            'aws_access_key_id' => '${GITLAB_S3_UPLOADS_ACCESS_KEY}',
+            'aws_secret_access_key' => '${GITLAB_S3_UPLOADS_SECRET_KEY}',
+            'endpoint' => '${GITLAB_S3_ENDPOINT}',
+            'path_style' => ${GITLAB_S3_PATH_STYLE}
+          }
+        }
+
+        # artifacts
+        gitlab_rails['object_store']['objects']['artifacts'] = {
+          'bucket' => '${GITLAB_S3_ARTIFACTS_BUCKET}',
+          'connection' => {
+            'provider' => 'AWS',
+            'region' => '${GITLAB_S3_REGION}',
+            'aws_access_key_id' => '${GITLAB_S3_ARTIFACTS_ACCESS_KEY}',
+            'aws_secret_access_key' => '${GITLAB_S3_ARTIFACTS_SECRET_KEY}',
+            'endpoint' => '${GITLAB_S3_ENDPOINT}',
+            'path_style' => ${GITLAB_S3_PATH_STYLE}
+          }
+        }
+
+        # packages
+        gitlab_rails['object_store']['objects']['packages'] = {
+          'bucket' => '${GITLAB_S3_PACKAGES_BUCKET}',
+          'connection' => {
+            'provider' => 'AWS',
+            'region' => '${GITLAB_S3_REGION}',
+            'aws_access_key_id' => '${GITLAB_S3_PACKAGES_ACCESS_KEY}',
+            'aws_secret_access_key' => '${GITLAB_S3_PACKAGES_SECRET_KEY}',
+            'endpoint' => '${GITLAB_S3_ENDPOINT}',
+            'path_style' => ${GITLAB_S3_PATH_STYLE}
+          }
+        }
+
     shm_size: "${GITLAB_SHM_SIZE}"
     volumes:
       - ./vol/gitlab/etc:/etc/gitlab
