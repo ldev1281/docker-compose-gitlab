@@ -78,7 +78,7 @@ services:
             'aws_access_key_id'     => '${GITLAB_S3_UPLOADS_ACCESS_KEY}',
             'aws_secret_access_key' => '${GITLAB_S3_UPLOADS_SECRET_KEY}',
             'endpoint'              => '${GITLAB_S3_ENDPOINT}',
-            'path_style'            => ${GITLAB_S3_PATH_STYLE}
+            'path_style'            => '${GITLAB_S3_PATH_STYLE}'
           }
         }
 
@@ -92,7 +92,7 @@ services:
             'aws_access_key_id'     => '${GITLAB_S3_ARTIFACTS_ACCESS_KEY}',
             'aws_secret_access_key' => '${GITLAB_S3_ARTIFACTS_SECRET_KEY}',
             'endpoint'              => '${GITLAB_S3_ENDPOINT}',
-            'path_style'            => ${GITLAB_S3_PATH_STYLE}
+            'path_style'            => '${GITLAB_S3_PATH_STYLE}'
           }
         }
 
@@ -106,7 +106,7 @@ services:
             'aws_access_key_id'     => '${GITLAB_S3_PACKAGES_ACCESS_KEY}',
             'aws_secret_access_key' => '${GITLAB_S3_PACKAGES_SECRET_KEY}',
             'endpoint'              => '${GITLAB_S3_ENDPOINT}',
-            'path_style'            => ${GITLAB_S3_PATH_STYLE}
+            'path_style'            => '${GITLAB_S3_PATH_STYLE}'
           }
         }
 
