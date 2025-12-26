@@ -162,25 +162,17 @@ prompt_for_configuration() {
         read -p "GITLAB_S3_REGION [${GITLAB_S3_REGION:-ap-southeast-1}]: " input
         GITLAB_S3_REGION=${input:-${GITLAB_S3_REGION:-ap-southeast-1}}
 
-        read -p "GITLAB_S3_ENDPOINT [${GITLAB_S3_ENDPOINT:-https://s3.ap-southeast-1.amazonaws.com}]: " input
-        GITLAB_S3_ENDPOINT=${input:-${GITLAB_S3_ENDPOINT:-https://s3.ap-southeast-1.amazonaws.com}}
-
-        read -p "GITLAB_S3_PATH_STYLE (true/false) [${GITLAB_S3_PATH_STYLE:-false}]: " input
-        GITLAB_S3_PATH_STYLE=${input:-${GITLAB_S3_PATH_STYLE:-false}}
-
         echo ""
-        echo "S3 bucket & prefixes:"
-        read -p "GITLAB_S3_BUCKET [${GITLAB_S3_BUCKET:-example-gitlab}]: " input
-        GITLAB_S3_BUCKET=${input:-${GITLAB_S3_BUCKET:-example-gitlab}}
+        echo "S3 bucket:"
 
-        read -p "GITLAB_S3_UPLOADS_PREFIX [${GITLAB_S3_UPLOADS_PREFIX:-gitlab-uploads}]: " input
-        GITLAB_S3_UPLOADS_PREFIX=${input:-${GITLAB_S3_UPLOADS_PREFIX:-gitlab-uploads}}
+        read -p "GITLAB_S3_UPLOADS_REMOTE_DIRECTORY [${GITLAB_S3_UPLOADS_REMOTE_DIRECTORY:-gitlab-uploads}]: " input
+        GITLAB_S3_UPLOADS_REMOTE_DIRECTORY=${input:-${GITLAB_S3_UPLOADS_REMOTE_DIRECTORY:-gitlab-uploads}}
 
-        read -p "GITLAB_S3_ARTIFACTS_PREFIX [${GITLAB_S3_ARTIFACTS_PREFIX:-gitlab-artifacts}]: " input
-        GITLAB_S3_ARTIFACTS_PREFIX=${input:-${GITLAB_S3_ARTIFACTS_PREFIX:-gitlab-artifacts}}
+        read -p "GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY [${GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY:-gitlab-artifacts}]: " input
+        GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY=${input:-${GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY:-gitlab-artifacts}}
 
-        read -p "GITLAB_S3_PACKAGES_PREFIX [${GITLAB_S3_PACKAGES_PREFIX:-gitlab-packages}]: " input
-        GITLAB_S3_PACKAGES_PREFIX=${input:-${GITLAB_S3_PACKAGES_PREFIX:-gitlab-packages}}
+        read -p "GITLAB_S3_PACKAGES_REMOTE_DIRECTORY [${GITLAB_S3_PACKAGES_REMOTE_DIRECTORY:-gitlab-packages}]: " input
+        GITLAB_S3_PACKAGES_REMOTE_DIRECTORY=${input:-${GITLAB_S3_PACKAGES_REMOTE_DIRECTORY:-gitlab-packages}}
 
         echo ""
         echo "S3 credentials (separate IAM users):"
@@ -270,12 +262,9 @@ confirm_and_save_configuration() {
         "ENABLE_GITLAB_S3=${ENABLE_GITLAB_S3}"
         "GITLAB_S3_PROVIDER=${GITLAB_S3_PROVIDER:-}"
         "GITLAB_S3_REGION=${GITLAB_S3_REGION:-}"
-        "GITLAB_S3_ENDPOINT=${GITLAB_S3_ENDPOINT:-}"
-        "GITLAB_S3_PATH_STYLE=${GITLAB_S3_PATH_STYLE:-}"
-        "GITLAB_S3_BUCKET=${GITLAB_S3_BUCKET:-}"
-        "GITLAB_S3_UPLOADS_PREFIX=${GITLAB_S3_UPLOADS_PREFIX:-}"
-        "GITLAB_S3_ARTIFACTS_PREFIX=${GITLAB_S3_ARTIFACTS_PREFIX:-}"
-        "GITLAB_S3_PACKAGES_PREFIX=${GITLAB_S3_PACKAGES_PREFIX:-}"
+        "GITLAB_S3_UPLOADS_REMOTE_DIRECTORY=${GITLAB_S3_UPLOADS_REMOTE_DIRECTORY:-}"
+        "GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY=${GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY:-}"
+        "GITLAB_S3_PACKAGES_REMOTE_DIRECTORY=${GITLAB_S3_PACKAGES_REMOTE_DIRECTORY:-}"
         "GITLAB_S3_UPLOADS_ACCESS_KEY=${GITLAB_S3_UPLOADS_ACCESS_KEY:-}"
         "GITLAB_S3_UPLOADS_SECRET_KEY=${GITLAB_S3_UPLOADS_SECRET_KEY:-}"
         "GITLAB_S3_ARTIFACTS_ACCESS_KEY=${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}"
