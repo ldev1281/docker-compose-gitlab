@@ -131,10 +131,10 @@ services:
     entrypoint: ["gitlab-runner", "register"]
     command:
       - "--non-interactive"
-      - "--url=http://${GITLAB_APP_HOSTNAME}:${GITLAB_INTERNAL_HTTP_PORT}"
+      - "--url=${GITLAB_EXTERNAL_URL}"
       - "--token=${GITLAB_RUNNER_TOKEN}"
       - "--executor=docker"
-      - "--docker-image=docker:27"
+      - "--docker-image=debian:stable"
       - "--description=gitlab-docker-runner"
       - "--docker-privileged"
       - "--docker-volumes=/var/run/docker.sock:/var/run/docker.sock"
@@ -170,4 +170,8 @@ networks:
 
   proxy-client-gitlab:
     name: proxy-client-gitlab
+    external: true
+
+  proxy-client-gitlab-runner:
+    name: proxy-client-gitlab-runner
     external: true
