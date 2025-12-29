@@ -71,7 +71,6 @@ create_backup_tasks() {
 # Load existing configuration from .env file
 load_existing_env() {
     set -o allexport
-    # shellcheck disable=SC1090
     source "$ENV_FILE"
     set +o allexport
 }
