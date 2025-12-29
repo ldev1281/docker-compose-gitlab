@@ -114,9 +114,6 @@ services:
 
     networks:
       proxy-client-gitlab:
-      gitlab-private:
-        aliases:
-          - ${GITLAB_APP_HOSTNAME}
 
   gitlab-runner-register:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
@@ -143,7 +140,7 @@ services:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab-private
+      - proxy-client-gitlab-runner
 
   gitlab-runner:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
@@ -160,14 +157,9 @@ services:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab-private
+      - proxy-client-gitlab-runner
 
 networks:
-  gitlab-private:
-    name: gitlab-private
-    driver: bridge
-    internal: true
-
   proxy-client-gitlab:
     name: proxy-client-gitlab
     external: true
