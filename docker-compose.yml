@@ -69,7 +69,7 @@ services:
         # ARTIFACTS
         gitlab_rails['artifacts_object_store_enabled'] = ${ENABLE_GITLAB_S3}
         gitlab_rails['artifacts_object_store_direct_upload'] = true
-        gitlab_rails['artifacts_object_store_remote_directory'] = '${GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY}'
+        gitlab_rails['artifacts_object_store_remote_directory'] = '${GITLAB_S3_ARTIFACTS_BUCKET}'
         gitlab_rails['artifacts_object_store_connection'] = {
           'provider'              => '${GITLAB_S3_PROVIDER}',
           'region'                => '${GITLAB_S3_REGION}',
@@ -80,7 +80,7 @@ services:
         # UPLOADS
         gitlab_rails['uploads_object_store_enabled'] = ${ENABLE_GITLAB_S3}
         gitlab_rails['uploads_object_store_direct_upload'] = true
-        gitlab_rails['uploads_object_store_remote_directory'] = '${GITLAB_S3_UPLOADS_REMOTE_DIRECTORY}'
+        gitlab_rails['uploads_object_store_remote_directory'] = '${GITLAB_S3_UPLOADS_BUCKET}'
         gitlab_rails['uploads_object_store_connection'] = {
           'provider'              => '${GITLAB_S3_PROVIDER}',
           'region'                => '${GITLAB_S3_REGION}',
@@ -91,7 +91,7 @@ services:
         # PACKAGES
         gitlab_rails['packages_object_store_enabled'] = ${ENABLE_GITLAB_S3}
         gitlab_rails['packages_object_store_direct_upload'] = true
-        gitlab_rails['packages_object_store_remote_directory'] = '${GITLAB_S3_PACKAGES_REMOTE_DIRECTORY}'
+        gitlab_rails['packages_object_store_remote_directory'] = '${GITLAB_S3_PACKAGES_BUCKET}'
         gitlab_rails['packages_object_store_connection'] = {
           'provider'              => '${GITLAB_S3_PROVIDER}',
           'region'                => '${GITLAB_S3_REGION}',

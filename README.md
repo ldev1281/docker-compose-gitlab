@@ -83,9 +83,9 @@ Configuration Variables:
 | `ENABLE_GITLAB_S3`                        | Enable S3-backed object storage for GitLab                         | `true`                          |
 | `GITLAB_S3_PROVIDER`                      | S3 provider name (e.g. `AWS`, `MinIO`, `Ceph`)                      | `AWS`                           |
 | `GITLAB_S3_REGION`                        | S3 region                                                          | `ap-southeast-1`                |
-| `GITLAB_S3_UPLOADS_REMOTE_DIRECTORY`      | S3 bucket/prefix for GitLab uploads                                | `gitlab-uploads`                |
-| `GITLAB_S3_ARTIFACTS_REMOTE_DIRECTORY`    | S3 bucket/prefix for CI job artifacts                              | `gitlab-artifacts`              |
-| `GITLAB_S3_PACKAGES_REMOTE_DIRECTORY`     | S3 bucket/prefix for GitLab Package Registry                       | `gitlab-packages`               |
+| `GITLAB_S3_UPLOADS_BUCKET`      | S3 bucket/prefix for GitLab uploads                                | `gitlab-uploads`                |
+| `GITLAB_S3_ARTIFACTS_BUCKET`    | S3 bucket/prefix for CI job artifacts                              | `gitlab-artifacts`              |
+| `GITLAB_S3_PACKAGES_BUCKET`     | S3 bucket/prefix for GitLab Package Registry                       | `gitlab-packages`               |
 | `GITLAB_S3_UPLOADS_ACCESS_KEY`            | S3 access key for uploads storage                                  | *(empty)*                       |
 | `GITLAB_S3_UPLOADS_SECRET_KEY`            | S3 secret key for uploads storage                                  | *(empty)*                       |
 | `GITLAB_S3_ARTIFACTS_ACCESS_KEY`          | S3 access key for CI artifacts storage                              | *(empty)*                       |
