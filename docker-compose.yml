@@ -75,6 +75,7 @@ services:
           'region'                => '${GITLAB_S3_REGION}',
           'aws_access_key_id'     => '${GITLAB_S3_ARTIFACTS_ACCESS_KEY}',
           'aws_secret_access_key' => '${GITLAB_S3_ARTIFACTS_SECRET_KEY}',
+          'path_style'            => true,
         }
 
         # UPLOADS
@@ -86,6 +87,7 @@ services:
           'region'                => '${GITLAB_S3_REGION}',
           'aws_access_key_id'     => '${GITLAB_S3_UPLOADS_ACCESS_KEY}',
           'aws_secret_access_key' => '${GITLAB_S3_UPLOADS_SECRET_KEY}',
+          'path_style'            => true,
         }
 
         # PACKAGES
@@ -97,6 +99,7 @@ services:
           'region'                => '${GITLAB_S3_REGION}',
           'aws_access_key_id'     => '${GITLAB_S3_PACKAGES_ACCESS_KEY}',
           'aws_secret_access_key' => '${GITLAB_S3_PACKAGES_SECRET_KEY}',
+          'path_style'            => true,
         }
 
     shm_size: "${GITLAB_SHM_SIZE}"
