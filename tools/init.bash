@@ -81,7 +81,6 @@ prompt_for_configuration() {
     echo ""
 
     GITLAB_VERSION=${CURRENT_GITLAB_VERSION}
-
     GITLAB_RUNNER_VERSION=${CURRENT_GITLAB_RUNNER_VERSION}
 
     read -p "GITLAB_APP_HOSTNAME [${GITLAB_APP_HOSTNAME:-gitlab.example.com}]: " input
@@ -150,6 +149,55 @@ prompt_for_configuration() {
     read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
     GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
 
+    read -p "ENABLE_GITLAB_S3 [${ENABLE_GITLAB_S3:-false}]: " input
+    ENABLE_GITLAB_S3=${input:-${ENABLE_GITLAB_S3:-false}}
+
+    if [[ "${ENABLE_GITLAB_S3}" == "true" ]]; then
+        echo ""
+        echo "S3 common settings:"
+        read -p "GITLAB_S3_PROVIDER [${GITLAB_S3_PROVIDER:-AWS}]: " input
+        GITLAB_S3_PROVIDER=${input:-${GITLAB_S3_PROVIDER:-AWS}}
+
+        read -p "GITLAB_S3_REGION [${GITLAB_S3_REGION:-ap-southeast-1}]: " input
+        GITLAB_S3_REGION=${input:-${GITLAB_S3_REGION:-ap-southeast-1}}
+
+        echo ""
+        echo "S3 bucket:"
+
+        read -p "GITLAB_S3_UPLOADS_BUCKET [${GITLAB_S3_UPLOADS_BUCKET:-gitlab-uploads}]: " input
+        GITLAB_S3_UPLOADS_BUCKET=${input:-${GITLAB_S3_UPLOADS_BUCKET:-gitlab-uploads}}
+
+        read -p "GITLAB_S3_ARTIFACTS_BUCKET [${GITLAB_S3_ARTIFACTS_BUCKET:-gitlab-artifacts}]: " input
+        GITLAB_S3_ARTIFACTS_BUCKET=${input:-${GITLAB_S3_ARTIFACTS_BUCKET:-gitlab-artifacts}}
+
+        read -p "GITLAB_S3_PACKAGES_BUCKET [${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}]: " input
+        GITLAB_S3_PACKAGES_BUCKET=${input:-${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}}
+
+        echo ""
+        echo "S3 credentials (separate IAM users):"
+
+        echo "Uploads IAM:"
+        read -p "GITLAB_S3_UPLOADS_ACCESS_KEY [${GITLAB_S3_UPLOADS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_UPLOADS_ACCESS_KEY=${input:-${GITLAB_S3_UPLOADS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_UPLOADS_SECRET_KEY [${GITLAB_S3_UPLOADS_SECRET_KEY:-}]: " input
+        GITLAB_S3_UPLOADS_SECRET_KEY=${input:-${GITLAB_S3_UPLOADS_SECRET_KEY:-}}
+
+        echo "Artifacts IAM:"
+        read -p "GITLAB_S3_ARTIFACTS_ACCESS_KEY [${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_ARTIFACTS_ACCESS_KEY=${input:-${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_ARTIFACTS_SECRET_KEY [${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}]: " input
+        GITLAB_S3_ARTIFACTS_SECRET_KEY=${input:-${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}}
+
+        echo "Packages IAM:"
+        read -p "GITLAB_S3_PACKAGES_ACCESS_KEY [${GITLAB_S3_PACKAGES_ACCESS_KEY:-}]: " input
+        GITLAB_S3_PACKAGES_ACCESS_KEY=${input:-${GITLAB_S3_PACKAGES_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_PACKAGES_SECRET_KEY [${GITLAB_S3_PACKAGES_SECRET_KEY:-}]: " input
+        GITLAB_S3_PACKAGES_SECRET_KEY=${input:-${GITLAB_S3_PACKAGES_SECRET_KEY:-}}
+    fi
+
     echo ""
     echo "GitLab Runner:"
 
@@ -208,6 +256,20 @@ confirm_and_save_configuration() {
         "GITLAB_AUTHENTIK_SLUG=${GITLAB_AUTHENTIK_SLUG}"
         "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
         "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
+        ""
+        "# S3 (Object Storage) - optional"
+        "ENABLE_GITLAB_S3=${ENABLE_GITLAB_S3}"
+        "GITLAB_S3_PROVIDER=${GITLAB_S3_PROVIDER:-}"
+        "GITLAB_S3_REGION=${GITLAB_S3_REGION:-}"
+        "GITLAB_S3_UPLOADS_BUCKET=${GITLAB_S3_UPLOADS_BUCKET:-}"
+        "GITLAB_S3_ARTIFACTS_BUCKET=${GITLAB_S3_ARTIFACTS_BUCKET:-}"
+        "GITLAB_S3_PACKAGES_BUCKET=${GITLAB_S3_PACKAGES_BUCKET:-}"
+        "GITLAB_S3_UPLOADS_ACCESS_KEY=${GITLAB_S3_UPLOADS_ACCESS_KEY:-}"
+        "GITLAB_S3_UPLOADS_SECRET_KEY=${GITLAB_S3_UPLOADS_SECRET_KEY:-}"
+        "GITLAB_S3_ARTIFACTS_ACCESS_KEY=${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}"
+        "GITLAB_S3_ARTIFACTS_SECRET_KEY=${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}"
+        "GITLAB_S3_PACKAGES_ACCESS_KEY=${GITLAB_S3_PACKAGES_ACCESS_KEY:-}"
+        "GITLAB_S3_PACKAGES_SECRET_KEY=${GITLAB_S3_PACKAGES_SECRET_KEY:-}"
         ""
         "# Docker Compose profiles"
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
