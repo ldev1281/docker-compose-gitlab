@@ -277,6 +277,8 @@ confirm_and_save_configuration() {
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
         "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-pending}"
+        "GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-pending}"
+        "GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-pending}"
     )
 
     echo ""
@@ -340,6 +342,26 @@ setup_containers() {
         echo "to retrieve the GitLab Runner registration token."
         echo ""
         
+        read -p "GITLAB_RUNNER_PROXY_SOCKS5H_HOST [${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-proxy-client-socks5h}]: " input
+        GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${input:-${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-proxy-client-socks5h}}
+        export GITLAB_RUNNER_PROXY_SOCKS5H_HOST
+
+        if grep -q '^GITLAB_RUNNER_PROXY_SOCKS5H_HOST=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_PROXY_SOCKS5H_HOST=.*|GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}" >> "$ENV_FILE"
+        fi
+
+        read -p "GITLAB_RUNNER_PROXY_SOCKS5H_PORT [${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-1080}]: " input
+        GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${input:-${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-1080}}
+        export GITLAB_RUNNER_PROXY_SOCKS5H_PORT
+
+        if grep -q '^GITLAB_RUNNER_PROXY_SOCKS5H_PORT=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_PROXY_SOCKS5H_PORT=.*|GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}" >> "$ENV_FILE"
+        fi
+
         read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
         GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
         export GITLAB_RUNNER_TOKEN
