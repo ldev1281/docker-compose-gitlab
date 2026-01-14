@@ -173,6 +173,9 @@ prompt_for_configuration() {
         read -p "GITLAB_S3_PACKAGES_BUCKET [${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}]: " input
         GITLAB_S3_PACKAGES_BUCKET=${input:-${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}}
 
+        read -p "GITLAB_S3_LFS_BUCKET [${GITLAB_S3_LFS_BUCKET:-gitlab-lfs}]: " input
+        GITLAB_S3_LFS_BUCKET=${input:-${GITLAB_S3_LFS_BUCKET:-gitlab-lfs}}
+
         echo ""
         echo "S3 credentials (separate IAM users):"
 
@@ -196,6 +199,13 @@ prompt_for_configuration() {
 
         read -p "GITLAB_S3_PACKAGES_SECRET_KEY [${GITLAB_S3_PACKAGES_SECRET_KEY:-}]: " input
         GITLAB_S3_PACKAGES_SECRET_KEY=${input:-${GITLAB_S3_PACKAGES_SECRET_KEY:-}}
+
+        echo "LFS IAM:"
+        read -p "GITLAB_S3_LFS_ACCESS_KEY [${GITLAB_S3_LFS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_LFS_ACCESS_KEY=${input:-${GITLAB_S3_LFS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_LFS_SECRET_KEY [${GITLAB_S3_LFS_SECRET_KEY:-}]: " input
+        GITLAB_S3_LFS_SECRET_KEY=${input:-${GITLAB_S3_LFS_SECRET_KEY:-}}
     fi
 
     echo ""
@@ -264,12 +274,15 @@ confirm_and_save_configuration() {
         "GITLAB_S3_UPLOADS_BUCKET=${GITLAB_S3_UPLOADS_BUCKET:-}"
         "GITLAB_S3_ARTIFACTS_BUCKET=${GITLAB_S3_ARTIFACTS_BUCKET:-}"
         "GITLAB_S3_PACKAGES_BUCKET=${GITLAB_S3_PACKAGES_BUCKET:-}"
+        "GITLAB_S3_LFS_BUCKET=${GITLAB_S3_LFS_BUCKET:-}"
         "GITLAB_S3_UPLOADS_ACCESS_KEY='${GITLAB_S3_UPLOADS_ACCESS_KEY:-}'"
         "GITLAB_S3_UPLOADS_SECRET_KEY='${GITLAB_S3_UPLOADS_SECRET_KEY:-}'"
         "GITLAB_S3_ARTIFACTS_ACCESS_KEY='${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}'"
         "GITLAB_S3_ARTIFACTS_SECRET_KEY='${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}'"
         "GITLAB_S3_PACKAGES_ACCESS_KEY='${GITLAB_S3_PACKAGES_ACCESS_KEY:-}'"
         "GITLAB_S3_PACKAGES_SECRET_KEY='${GITLAB_S3_PACKAGES_SECRET_KEY:-}'"
+        "GITLAB_S3_LFS_ACCESS_KEY='${GITLAB_S3_LFS_ACCESS_KEY:-}'"
+        "GITLAB_S3_LFS_SECRET_KEY='${GITLAB_S3_LFS_SECRET_KEY:-}'"
         ""
         "# Docker Compose profiles"
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"

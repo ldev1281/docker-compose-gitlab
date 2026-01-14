@@ -102,6 +102,18 @@ services:
           'path_style'            => true,
         }
 
+        # LFS
+        gitlab_rails['lfs_object_store_enabled'] = ${ENABLE_GITLAB_S3}
+        gitlab_rails['lfs_object_store_direct_upload'] = true
+        gitlab_rails['lfs_object_store_remote_directory'] = '${GITLAB_S3_LFS_BUCKET}'
+
+        gitlab_rails['lfs_object_store_connection'] = {
+          'provider'              => '${GITLAB_S3_PROVIDER}',
+          'region'                => '${GITLAB_S3_REGION}',
+          'aws_access_key_id'     => '${GITLAB_S3_LFS_ACCESS_KEY}',
+          'aws_secret_access_key' => '${GITLAB_S3_LFS_SECRET_KEY}',
+          'path_style'            => true,
+        }
     shm_size: "${GITLAB_SHM_SIZE}"
     volumes:
       - ./vol/gitlab/etc:/etc/gitlab

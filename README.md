@@ -88,12 +88,15 @@ Configuration Variables:
 | `GITLAB_S3_UPLOADS_BUCKET`                | S3 bucket/prefix for GitLab uploads                                | `gitlab-uploads`                |
 | `GITLAB_S3_ARTIFACTS_BUCKET`              | S3 bucket/prefix for CI job artifacts                              | `gitlab-artifacts`              |
 | `GITLAB_S3_PACKAGES_BUCKET`               | S3 bucket/prefix for GitLab Package Registry                       | `gitlab-packages`               |
+| `GITLAB_S3_LFS_BUCKET`                    | S3 bucket/prefix for GitLab LFS (Large File Storage)               | `gitlab-lfs`                    |
 | `GITLAB_S3_UPLOADS_ACCESS_KEY`            | S3 access key for uploads storage                                  | *(empty)*                       |
 | `GITLAB_S3_UPLOADS_SECRET_KEY`            | S3 secret key for uploads storage                                  | *(empty)*                       |
 | `GITLAB_S3_ARTIFACTS_ACCESS_KEY`          | S3 access key for CI artifacts storage                              | *(empty)*                       |
 | `GITLAB_S3_ARTIFACTS_SECRET_KEY`          | S3 secret key for CI artifacts storage                              | *(empty)*                       |
 | `GITLAB_S3_PACKAGES_ACCESS_KEY`           | S3 access key for package registry storage                          | *(empty)*                       |
 | `GITLAB_S3_PACKAGES_SECRET_KEY`           | S3 secret key for package registry storage                          | *(empty)*                       |
+| `GITLAB_S3_LFS_ACCESS_KEY`                | S3 access key for GitLab LFS storage                                | *(empty)*                       |
+| `GITLAB_S3_LFS_SECRET_KEY`                | S3 secret key for GitLab LFS storage                                | *(empty)*                       |
 
 To configure and launch the stack, run the provided script:
 
