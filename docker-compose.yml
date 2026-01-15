@@ -140,6 +140,7 @@ services:
     environment:
       GITLAB_EXTERNAL_URL: "${GITLAB_EXTERNAL_URL}"
       GITLAB_RUNNER_TOKEN: "${GITLAB_RUNNER_TOKEN}"
+      GITLAB_APP_HOSTNAME: "${GITLAB_APP_HOSTNAME}"
       GITLAB_RUNNER_PROXY_SOCKS5H_PORT: "${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       GITLAB_RUNNER_PROXY_SOCKS5H_HOST: "${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}"
     entrypoint: ["gitlab-runner", "register"]
@@ -157,9 +158,11 @@ services:
       - "--env=HTTP_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=HTTPS_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=ALL_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=NO_PROXY=${GITLAB_APP_HOSTNAME}"
       - "--env=http_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=https_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=all_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=no_proxy=${GITLAB_APP_HOSTNAME}"
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
