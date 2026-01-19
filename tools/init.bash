@@ -327,6 +327,8 @@ confirm_and_save_configuration() {
 setup_containers() {
     echo "Stopping all containers and removing volumes..."
     docker compose down -v
+    docker compose down gitlab-runner -v
+    docker compose down gitlab-runner-register -v
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
