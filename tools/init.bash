@@ -348,7 +348,7 @@ setup_containers() {
 
         echo "Starting gitlab-app container..."
         echo "Waiting for Gitlab service to initialize..."        
-        docker compose up  gitlab-app --wait
+        docker compose up gitlab-app --wait
 
         docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
         echo ""
