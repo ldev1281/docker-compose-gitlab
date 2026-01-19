@@ -178,8 +178,6 @@ services:
     depends_on:
       gitlab-app:
         condition: service_healthy
-      gitlab-runner-register:
-        condition: service_completed_successfully
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
