@@ -223,7 +223,6 @@ prompt_for_configuration() {
             rm -f "$RUNNER_CONFIG_FILE"
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
-        else
             COMPOSE_PROFILES="" # To prevent re-registration
         fi
     fi
