@@ -212,24 +212,38 @@ prompt_for_configuration() {
     echo "GitLab Runner:"
 
     if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
-        echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
-        echo "Runner registration will be skipped."
-
-        if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
-            COMPOSE_PROFILES="gitlab-runner"
-        fi
-    else
+        echo "Existing GitLab Runner configuration found at:"
+        echo "  $RUNNER_CONFIG_FILE"
         echo ""
-        echo "GitLab Runner is not registered (config.toml not found)."
-        echo "Would you like to register GitLab Runner?"
 
         while :; do
-            read -p "Register GitLab Runner? (y/n): " CONFIRM
+            read -p "Remove/re-register GitLab Runner? (y/N): " CONFIRM
+            echo ""
+
+            [[ "$CONFIRM" == "y" ]] && {
+                rm -f "$RUNNER_CONFIG_FILE"
+                echo "Removed: $RUNNER_CONFIG_FILE"
+                echo ""
+                break
+            }
+
+            # Default: skip re-registration
+            COMPOSE_PROFILES="" # To prevent re-registration
+            break
+        done
+    fi
+
+    if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
+        echo "GitLab Runner is not registered (config.toml not found)."
+
+        while :; do
+            read -p "Register GitLab Runner? (y/N): " CONFIRM
+            echo ""
 
             [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
-            [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
 
-            echo "Please type y or n."
+            COMPOSE_PROFILES=""
+            break
         done
     fi
 }
