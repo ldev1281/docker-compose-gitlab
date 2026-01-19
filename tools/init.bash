@@ -340,7 +340,7 @@ setup_containers() {
         fi
     fi
 
-    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
+    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-register,gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo ""
         echo "GitLab Runner is not registered yet."
         echo "GitLab will be started first, so you can retrieve the registration token."
