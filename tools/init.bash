@@ -224,6 +224,8 @@ prompt_for_configuration() {
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
             COMPOSE_PROFILES="" # To prevent re-registration
+        else
+            COMPOSE_PROFILES="gitlab-runner" # To prevent re-registration
         fi
     fi
 
@@ -234,7 +236,7 @@ prompt_for_configuration() {
         echo ""
 
         if [[ "$CONFIRM" == "y" ]]; then
-            COMPOSE_PROFILES="gitlab-runner"
+            COMPOSE_PROFILES="gitlab-register,gitlab-runner"
         else
             COMPOSE_PROFILES=""
         fi

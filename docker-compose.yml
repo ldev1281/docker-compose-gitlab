@@ -133,7 +133,7 @@ services:
   gitlab-runner-register:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     profiles:
-      - gitlab-runner
+      - gitlab-register
     depends_on:
       gitlab-app:
         condition: service_healthy
