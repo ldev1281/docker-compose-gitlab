@@ -216,21 +216,16 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        while :; do
-            read -p "Remove/re-register GitLab Runner? (y/N): " CONFIRM
+        read -p "Remove/re-register GitLab Runner? (y/N): " CONFIRM
+        echo ""
+
+        if [[ "$CONFIRM" == "y" ]]; then
+            rm -f "$RUNNER_CONFIG_FILE"
+            echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
-
-            [[ "$CONFIRM" == "y" ]] && {
-                rm -f "$RUNNER_CONFIG_FILE"
-                echo "Removed: $RUNNER_CONFIG_FILE"
-                echo ""
-                break
-            }
-
-            # Default: skip re-registration
+        else
             COMPOSE_PROFILES="" # To prevent re-registration
-            break
-        done
+        fi
     fi
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
@@ -243,6 +238,7 @@ prompt_for_configuration() {
             COMPOSE_PROFILES="gitlab-runner"
         else
             COMPOSE_PROFILES=""
+        fi
     fi
 }
 
