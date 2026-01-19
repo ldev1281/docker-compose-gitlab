@@ -236,15 +236,13 @@ prompt_for_configuration() {
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
 
-        while :; do
-            read -p "Register GitLab Runner? (y/N): " CONFIRM
-            echo ""
+        read -p "Register GitLab Runner? (y/N): " CONFIRM
+        echo ""
 
-            [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
-
+        if [[ "$CONFIRM" == "y" ]]; then
+            COMPOSE_PROFILES="gitlab-runner"
+        else
             COMPOSE_PROFILES=""
-            break
-        done
     fi
 }
 
