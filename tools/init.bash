@@ -223,10 +223,8 @@ prompt_for_configuration() {
             rm -f "$RUNNER_CONFIG_FILE"
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
-            COMPOSE_PROFILES="" # To prevent re-registration
         else
-            COMPOSE_PROFILES="gitlab-runner" # To prevent re-registration
-        fi
+            COMPOSE_PROFILES="gitlab-runner"
     fi
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
