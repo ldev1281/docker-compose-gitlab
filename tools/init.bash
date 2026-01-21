@@ -81,7 +81,6 @@ prompt_for_configuration() {
     echo ""
 
     GITLAB_VERSION=${CURRENT_GITLAB_VERSION}
-
     GITLAB_RUNNER_VERSION=${CURRENT_GITLAB_RUNNER_VERSION}
 
     read -p "GITLAB_APP_HOSTNAME [${GITLAB_APP_HOSTNAME:-gitlab.example.com}]: " input
@@ -150,29 +149,96 @@ prompt_for_configuration() {
     read -p "GITLAB_AUTHENTIK_CLIENT_SECRET [${GITLAB_AUTHENTIK_CLIENT_SECRET:-}]: " input
     GITLAB_AUTHENTIK_CLIENT_SECRET=${input:-${GITLAB_AUTHENTIK_CLIENT_SECRET:-}}
 
-    echo ""
+    read -p "ENABLE_GITLAB_S3 (true/false) [${ENABLE_GITLAB_S3:-false}]: " input
+    ENABLE_GITLAB_S3=${input:-${ENABLE_GITLAB_S3:-false}}
+
+    if [[ "${ENABLE_GITLAB_S3}" == "true" ]]; then
+        echo ""
+        echo "S3 common settings:"
+        read -p "GITLAB_S3_PROVIDER [${GITLAB_S3_PROVIDER:-AWS}]: " input
+        GITLAB_S3_PROVIDER=${input:-${GITLAB_S3_PROVIDER:-AWS}}
+
+        read -p "GITLAB_S3_REGION [${GITLAB_S3_REGION:-ap-southeast-1}]: " input
+        GITLAB_S3_REGION=${input:-${GITLAB_S3_REGION:-ap-southeast-1}}
+
+        echo ""
+        echo "S3 bucket:"
+
+        read -p "GITLAB_S3_UPLOADS_BUCKET [${GITLAB_S3_UPLOADS_BUCKET:-gitlab-uploads}]: " input
+        GITLAB_S3_UPLOADS_BUCKET=${input:-${GITLAB_S3_UPLOADS_BUCKET:-gitlab-uploads}}
+
+        read -p "GITLAB_S3_ARTIFACTS_BUCKET [${GITLAB_S3_ARTIFACTS_BUCKET:-gitlab-artifacts}]: " input
+        GITLAB_S3_ARTIFACTS_BUCKET=${input:-${GITLAB_S3_ARTIFACTS_BUCKET:-gitlab-artifacts}}
+
+        read -p "GITLAB_S3_PACKAGES_BUCKET [${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}]: " input
+        GITLAB_S3_PACKAGES_BUCKET=${input:-${GITLAB_S3_PACKAGES_BUCKET:-gitlab-packages}}
+
+        read -p "GITLAB_S3_LFS_BUCKET [${GITLAB_S3_LFS_BUCKET:-gitlab-lfs}]: " input
+        GITLAB_S3_LFS_BUCKET=${input:-${GITLAB_S3_LFS_BUCKET:-gitlab-lfs}}
+
+        echo ""
+        echo "S3 credentials (separate IAM users):"
+
+        echo "Uploads IAM:"
+        read -p "GITLAB_S3_UPLOADS_ACCESS_KEY [${GITLAB_S3_UPLOADS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_UPLOADS_ACCESS_KEY=${input:-${GITLAB_S3_UPLOADS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_UPLOADS_SECRET_KEY [${GITLAB_S3_UPLOADS_SECRET_KEY:-}]: " input
+        GITLAB_S3_UPLOADS_SECRET_KEY=${input:-${GITLAB_S3_UPLOADS_SECRET_KEY:-}}
+
+        echo "Artifacts IAM:"
+        read -p "GITLAB_S3_ARTIFACTS_ACCESS_KEY [${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_ARTIFACTS_ACCESS_KEY=${input:-${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_ARTIFACTS_SECRET_KEY [${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}]: " input
+        GITLAB_S3_ARTIFACTS_SECRET_KEY=${input:-${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}}
+
+        echo "Packages IAM:"
+        read -p "GITLAB_S3_PACKAGES_ACCESS_KEY [${GITLAB_S3_PACKAGES_ACCESS_KEY:-}]: " input
+        GITLAB_S3_PACKAGES_ACCESS_KEY=${input:-${GITLAB_S3_PACKAGES_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_PACKAGES_SECRET_KEY [${GITLAB_S3_PACKAGES_SECRET_KEY:-}]: " input
+        GITLAB_S3_PACKAGES_SECRET_KEY=${input:-${GITLAB_S3_PACKAGES_SECRET_KEY:-}}
+
+        echo "LFS IAM:"
+        read -p "GITLAB_S3_LFS_ACCESS_KEY [${GITLAB_S3_LFS_ACCESS_KEY:-}]: " input
+        GITLAB_S3_LFS_ACCESS_KEY=${input:-${GITLAB_S3_LFS_ACCESS_KEY:-}}
+
+        read -p "GITLAB_S3_LFS_SECRET_KEY [${GITLAB_S3_LFS_SECRET_KEY:-}]: " input
+        GITLAB_S3_LFS_SECRET_KEY=${input:-${GITLAB_S3_LFS_SECRET_KEY:-}}
+    fi
+
+   echo ""
     echo "GitLab Runner:"
 
     if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
-        echo "Existing GitLab Runner configuration found at: $RUNNER_CONFIG_FILE"
-        echo "Runner registration will be skipped."
+        echo "Existing GitLab Runner configuration found at:"
+        echo "  $RUNNER_CONFIG_FILE"
+        echo ""
 
-        if [[ -z "${COMPOSE_PROFILES:-}" ]]; then
+        read -p "Remove currrent GitLab Runner? (y/N): " CONFIRM
+        echo ""
+
+        if [[ "$CONFIRM" == "y" ]]; then
+            rm -f "$RUNNER_CONFIG_FILE"
+            echo "Removed: $RUNNER_CONFIG_FILE"
+            echo ""
+        else
             COMPOSE_PROFILES="gitlab-runner"
         fi
-    else
-        echo ""
+    fi
+
+    if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
-        echo "Would you like to register GitLab Runner?"
 
-        while :; do
-            read -p "Register GitLab Runner? (y/n): " CONFIRM
+        read -p "Register a new GitLab Runner? (y/N): " CONFIRM
+        echo ""
 
-            [[ "$CONFIRM" == "y" ]] && { COMPOSE_PROFILES="gitlab-runner"; break; }
-            [[ "$CONFIRM" == "n" ]] && { COMPOSE_PROFILES=""; break; }
-
-            echo "Please type y or n."
-        done
+        if [[ "$CONFIRM" == "y" ]]; then
+            COMPOSE_PROFILES="gitlab-register,gitlab-runner"
+        else
+            COMPOSE_PROFILES=""
+        fi
     fi
 }
 
@@ -209,12 +275,31 @@ confirm_and_save_configuration() {
         "GITLAB_AUTHENTIK_CLIENT_ID=${GITLAB_AUTHENTIK_CLIENT_ID}"
         "GITLAB_AUTHENTIK_CLIENT_SECRET=${GITLAB_AUTHENTIK_CLIENT_SECRET}"
         ""
+        "# S3 (Object Storage) - optional"
+        "ENABLE_GITLAB_S3=${ENABLE_GITLAB_S3}"
+        "GITLAB_S3_PROVIDER=${GITLAB_S3_PROVIDER:-}"
+        "GITLAB_S3_REGION=${GITLAB_S3_REGION:-}"
+        "GITLAB_S3_UPLOADS_BUCKET=${GITLAB_S3_UPLOADS_BUCKET:-}"
+        "GITLAB_S3_ARTIFACTS_BUCKET=${GITLAB_S3_ARTIFACTS_BUCKET:-}"
+        "GITLAB_S3_PACKAGES_BUCKET=${GITLAB_S3_PACKAGES_BUCKET:-}"
+        "GITLAB_S3_LFS_BUCKET=${GITLAB_S3_LFS_BUCKET:-}"
+        "GITLAB_S3_UPLOADS_ACCESS_KEY='${GITLAB_S3_UPLOADS_ACCESS_KEY:-}'"
+        "GITLAB_S3_UPLOADS_SECRET_KEY='${GITLAB_S3_UPLOADS_SECRET_KEY:-}'"
+        "GITLAB_S3_ARTIFACTS_ACCESS_KEY='${GITLAB_S3_ARTIFACTS_ACCESS_KEY:-}'"
+        "GITLAB_S3_ARTIFACTS_SECRET_KEY='${GITLAB_S3_ARTIFACTS_SECRET_KEY:-}'"
+        "GITLAB_S3_PACKAGES_ACCESS_KEY='${GITLAB_S3_PACKAGES_ACCESS_KEY:-}'"
+        "GITLAB_S3_PACKAGES_SECRET_KEY='${GITLAB_S3_PACKAGES_SECRET_KEY:-}'"
+        "GITLAB_S3_LFS_ACCESS_KEY='${GITLAB_S3_LFS_ACCESS_KEY:-}'"
+        "GITLAB_S3_LFS_SECRET_KEY='${GITLAB_S3_LFS_SECRET_KEY:-}'"
+        ""
         "# Docker Compose profiles"
         "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
         ""
         "# GitLab Runner"
         "GITLAB_RUNNER_VERSION=${GITLAB_RUNNER_VERSION}"
         "GITLAB_RUNNER_TOKEN=${GITLAB_RUNNER_TOKEN:-pending}"
+        "GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-1080}"
+        "GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-proxy-client-socks5h}"
     )
 
     echo ""
@@ -241,6 +326,8 @@ confirm_and_save_configuration() {
 setup_containers() {
     echo "Stopping all containers and removing volumes..."
     docker compose down -v
+    docker compose down gitlab-runner -v
+    docker compose down gitlab-runner-register -v
 
     if [ -d "$VOL_DIR" ]; then
         echo "The 'vol' directory exists:"
@@ -254,7 +341,7 @@ setup_containers() {
         fi
     fi
 
-    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
+    if [[ "${COMPOSE_PROFILES:-}" == "gitlab-register,gitlab-runner" && ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo ""
         echo "GitLab Runner is not registered yet."
         echo "GitLab will be started first, so you can retrieve the registration token."
@@ -262,7 +349,7 @@ setup_containers() {
 
         echo "Starting gitlab-app container..."
         echo "Waiting for Gitlab service to initialize..."        
-        docker compose up  gitlab-app --wait
+        docker compose up gitlab-app --wait
 
         docker exec gitlab-app bash -lc "test -f /etc/gitlab/initial_root_password && cat /etc/gitlab/initial_root_password || true"
         echo ""
@@ -278,6 +365,26 @@ setup_containers() {
         echo "to retrieve the GitLab Runner registration token."
         echo ""
         
+        read -p "GITLAB_RUNNER_PROXY_SOCKS5H_HOST [${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-proxy-client-socks5h}]: " input
+        GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${input:-${GITLAB_RUNNER_PROXY_SOCKS5H_HOST:-proxy-client-socks5h}}
+        export GITLAB_RUNNER_PROXY_SOCKS5H_HOST
+
+        if grep -q '^GITLAB_RUNNER_PROXY_SOCKS5H_HOST=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_PROXY_SOCKS5H_HOST=.*|GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_PROXY_SOCKS5H_HOST=${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}" >> "$ENV_FILE"
+        fi
+
+        read -p "GITLAB_RUNNER_PROXY_SOCKS5H_PORT [${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-1080}]: " input
+        GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${input:-${GITLAB_RUNNER_PROXY_SOCKS5H_PORT:-1080}}
+        export GITLAB_RUNNER_PROXY_SOCKS5H_PORT
+
+        if grep -q '^GITLAB_RUNNER_PROXY_SOCKS5H_PORT=' "$ENV_FILE"; then
+            sed -i "s|^GITLAB_RUNNER_PROXY_SOCKS5H_PORT=.*|GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}|" "$ENV_FILE"
+        else
+            echo "GITLAB_RUNNER_PROXY_SOCKS5H_PORT=${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}" >> "$ENV_FILE"
+        fi
+
         read -p "GITLAB_RUNNER_TOKEN [${GITLAB_RUNNER_TOKEN:-}]: " input
         GITLAB_RUNNER_TOKEN=${input:-${GITLAB_RUNNER_TOKEN:-}}
         export GITLAB_RUNNER_TOKEN

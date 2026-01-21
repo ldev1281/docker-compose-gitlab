@@ -63,6 +63,57 @@ services:
             }
           }
         ]
+
+        # ------------- (S3) -------------
+
+        # ARTIFACTS
+        gitlab_rails['artifacts_object_store_enabled'] = ${ENABLE_GITLAB_S3}
+        gitlab_rails['artifacts_object_store_direct_upload'] = true
+        gitlab_rails['artifacts_object_store_remote_directory'] = '${GITLAB_S3_ARTIFACTS_BUCKET}'
+        gitlab_rails['artifacts_object_store_connection'] = {
+          'provider'              => '${GITLAB_S3_PROVIDER}',
+          'region'                => '${GITLAB_S3_REGION}',
+          'aws_access_key_id'     => '${GITLAB_S3_ARTIFACTS_ACCESS_KEY}',
+          'aws_secret_access_key' => '${GITLAB_S3_ARTIFACTS_SECRET_KEY}',
+          'path_style'            => true,
+        }
+
+        # UPLOADS
+        gitlab_rails['uploads_object_store_enabled'] = ${ENABLE_GITLAB_S3}
+        gitlab_rails['uploads_object_store_direct_upload'] = true
+        gitlab_rails['uploads_object_store_remote_directory'] = '${GITLAB_S3_UPLOADS_BUCKET}'
+        gitlab_rails['uploads_object_store_connection'] = {
+          'provider'              => '${GITLAB_S3_PROVIDER}',
+          'region'                => '${GITLAB_S3_REGION}',
+          'aws_access_key_id'     => '${GITLAB_S3_UPLOADS_ACCESS_KEY}',
+          'aws_secret_access_key' => '${GITLAB_S3_UPLOADS_SECRET_KEY}',
+          'path_style'            => true,
+        }
+
+        # PACKAGES
+        gitlab_rails['packages_object_store_enabled'] = ${ENABLE_GITLAB_S3}
+        gitlab_rails['packages_object_store_direct_upload'] = true
+        gitlab_rails['packages_object_store_remote_directory'] = '${GITLAB_S3_PACKAGES_BUCKET}'
+        gitlab_rails['packages_object_store_connection'] = {
+          'provider'              => '${GITLAB_S3_PROVIDER}',
+          'region'                => '${GITLAB_S3_REGION}',
+          'aws_access_key_id'     => '${GITLAB_S3_PACKAGES_ACCESS_KEY}',
+          'aws_secret_access_key' => '${GITLAB_S3_PACKAGES_SECRET_KEY}',
+          'path_style'            => true,
+        }
+
+        # LFS
+        gitlab_rails['lfs_object_store_enabled'] = ${ENABLE_GITLAB_S3}
+        gitlab_rails['lfs_object_store_direct_upload'] = true
+        gitlab_rails['lfs_object_store_remote_directory'] = '${GITLAB_S3_LFS_BUCKET}'
+
+        gitlab_rails['lfs_object_store_connection'] = {
+          'provider'              => '${GITLAB_S3_PROVIDER}',
+          'region'                => '${GITLAB_S3_REGION}',
+          'aws_access_key_id'     => '${GITLAB_S3_LFS_ACCESS_KEY}',
+          'aws_secret_access_key' => '${GITLAB_S3_LFS_SECRET_KEY}',
+          'path_style'            => true,
+        }
     shm_size: "${GITLAB_SHM_SIZE}"
     volumes:
       - ./vol/gitlab/etc:/etc/gitlab
@@ -78,36 +129,45 @@ services:
 
     networks:
       proxy-client-gitlab:
-      gitlab-private:
-        aliases:
-          - ${GITLAB_APP_HOSTNAME}
 
   gitlab-runner-register:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
     profiles:
-      - gitlab-runner
+      - gitlab-register
     depends_on:
       gitlab-app:
         condition: service_healthy
     environment:
       GITLAB_EXTERNAL_URL: "${GITLAB_EXTERNAL_URL}"
       GITLAB_RUNNER_TOKEN: "${GITLAB_RUNNER_TOKEN}"
+      GITLAB_APP_HOSTNAME: "${GITLAB_APP_HOSTNAME}"
+      GITLAB_RUNNER_PROXY_SOCKS5H_PORT: "${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      GITLAB_RUNNER_PROXY_SOCKS5H_HOST: "${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}"
     entrypoint: ["gitlab-runner", "register"]
     command:
       - "--non-interactive"
-      - "--url= http://${GITLAB_APP_HOSTNAME}:${GITLAB_INTERNAL_HTTP_PORT}"
+      - "--url=${GITLAB_EXTERNAL_URL}"
       - "--token=${GITLAB_RUNNER_TOKEN}"
       - "--executor=docker"
-      - "--docker-image=docker:27"
+      - "--docker-image=debian:stable"
       - "--description=gitlab-docker-runner"
       - "--docker-privileged"
       - "--docker-volumes=/var/run/docker.sock:/var/run/docker.sock"
       - "--docker-volumes=/cache"
+      - "--docker-network-mode=proxy-client-gitlab-runner"
+      - "--env=HTTP_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=HTTPS_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=ALL_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=NO_PROXY=${GITLAB_APP_HOSTNAME}"
+      - "--env=http_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=https_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=all_proxy=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
+      - "--env=no_proxy=${GITLAB_APP_HOSTNAME}"
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab-private
+      - proxy-client-gitlab-runner
 
   gitlab-runner:
     image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
@@ -118,20 +178,17 @@ services:
     depends_on:
       gitlab-app:
         condition: service_healthy
-      gitlab-runner-register:
-        condition: service_completed_successfully
     volumes:
       - ./vol/gitlab-runner:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab-private
+      - proxy-client-gitlab-runner
 
 networks:
-  gitlab-private:
-    name: gitlab-private
-    driver: bridge
-    internal: true
-
   proxy-client-gitlab:
     name: proxy-client-gitlab
+    external: true
+
+  proxy-client-gitlab-runner:
+    name: proxy-client-gitlab-runner
     external: true
