@@ -6,21 +6,12 @@ env:
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release'
-        required: false
-        default: ''
   pull_request:
     branches:
       - main
-    paths:
-      - 'tools/init.bash'
   push:
     branches:
       - main
-    paths:
-      - 'tools/init.bash'
 
 permissions:
   contents: write
@@ -71,11 +62,37 @@ jobs:
             exit 1
           fi
 
-          TAG="$APP_VERSION"
+          echo "Base APP_VERSION: $APP_VERSION"
+
+          TAG_SUFFIX="+ldev"
+
+          EXISTING_TAGS=$(git tag --list "${APP_VERSION}${TAG_SUFFIX}[0-9]*.[0-9]*" || true)
+
+          MAJOR=0
+          MINOR=1
+
+          if [ -n "$EXISTING_TAGS" ]; then
+            LAST_TAG=$(printf '%s\n' "$EXISTING_TAGS" \
+              | sed -E "s|^${APP_VERSION}\+ldev([0-9]+)\.([0-9]+)$|\1 \2|" \
+              | sort -n -k1,1 -k2,2 \
+              | tail -n1)
+
+            MAJOR=$(echo "$LAST_TAG" | awk '{print $1}')
+            MINOR=$(echo "$LAST_TAG" | awk '{print $2}')
+            MINOR=$((MINOR + 1))
+
+            if [ "$MINOR" -ge 10 ]; then
+              MINOR=0
+              MAJOR=$((MAJOR + 1))
+            fi
+          fi
+
+          TAG="${APP_VERSION}${TAG_SUFFIX}${MAJOR}.${MINOR}"
+          echo "Next tag: $TAG"
 
           if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists — skipping release."
-            exit 0
+            echo "Tag $TAG already exists — aborting."
+            exit 1
           fi
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -83,7 +100,6 @@ jobs:
       - name: Create release archive
         if: steps.version.outputs.tag != ''
         run: |
-          ARCHIVE_NAME="${{ env.ARCHIVE_NAME }}"
           echo "Creating archive ${ARCHIVE_NAME}.tar.gz"
           git archive --format=tar.gz --output="${ARCHIVE_NAME}.tar.gz" HEAD
 
@@ -93,8 +109,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.tag || steps.version.outputs.tag }}
-          name: ${{ github.event.inputs.tag || steps.version.outputs.tag }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
