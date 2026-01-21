@@ -208,7 +208,7 @@ prompt_for_configuration() {
         GITLAB_S3_LFS_SECRET_KEY=${input:-${GITLAB_S3_LFS_SECRET_KEY:-}}
     fi
 
-    echo ""
+   echo ""
     echo "GitLab Runner:"
 
     if [[ -f "$RUNNER_CONFIG_FILE" ]]; then
@@ -225,6 +225,7 @@ prompt_for_configuration() {
             echo ""
         else
             COMPOSE_PROFILES="gitlab-runner"
+        fi
     fi
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
