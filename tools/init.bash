@@ -216,7 +216,7 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        read -p "Remove/re-register GitLab Runner? (y/N): " CONFIRM
+        read -p "Remove currrent GitLab Runner? (y/N): " CONFIRM
         echo ""
 
         if [[ "$CONFIRM" == "y" ]]; then
@@ -231,7 +231,7 @@ prompt_for_configuration() {
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
 
-        read -p "Register GitLab Runner? (y/N): " CONFIRM
+        read -p "Register a new GitLab Runner? (y/N): " CONFIRM
         echo ""
 
         if [[ "$CONFIRM" == "y" ]]; then
