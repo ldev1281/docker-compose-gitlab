@@ -62,10 +62,7 @@ jobs:
             exit 1
           fi
 
-          echo "Base APP_VERSION: $APP_VERSION"
-
           TAG_SUFFIX="+ldev"
-
           EXISTING_TAGS=$(git tag --list "${APP_VERSION}${TAG_SUFFIX}[0-9]*.[0-9]*" || true)
 
           MAJOR=0
@@ -100,6 +97,7 @@ jobs:
       - name: Create release archive
         if: steps.version.outputs.tag != ''
         run: |
+          ARCHIVE_NAME="${{ env.ARCHIVE_NAME }}"
           echo "Creating archive ${ARCHIVE_NAME}.tar.gz"
           git archive --format=tar.gz --output="${ARCHIVE_NAME}.tar.gz" HEAD
 
