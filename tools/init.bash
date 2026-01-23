@@ -399,7 +399,9 @@ setup_containers() {
         echo "Registration token saved into .env"
         echo "Continuing with full container startup..."     
         echo ""
-        docker compose up --wait
+        docker compose up gitlab-app --wait
+        docker compose run --rm gitlab-runner-register
+        docker compose up gitlab-runner --wait
 
     else
         echo "Starting all containers..."
