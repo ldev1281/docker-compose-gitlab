@@ -216,31 +216,53 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        read -p "Remove currrent GitLab Runner? (y/N): " CONFIRM
-        echo ""
-
-        if [[ "$CONFIRM" == "y" ]]; then
-            rm -f "$RUNNER_CONFIG_FILE"
-            echo "Removed: $RUNNER_CONFIG_FILE"
+        while :; do
+            read -p "Remove current GitLab Runner? (y/N): " CONFIRM
             echo ""
-        else
-            COMPOSE_PROFILES="gitlab-runner"
-        fi
+            CONFIRM="${CONFIRM,,}"
+            [[ -z "$CONFIRM" ]] && CONFIRM="n"
+
+            [[ "$CONFIRM" == "y" ]] && {
+                rm -f "$RUNNER_CONFIG_FILE"
+                echo "Removed: $RUNNER_CONFIG_FILE"
+                echo ""
+                break
+            }
+
+            [[ "$CONFIRM" == "n" ]] && {
+                COMPOSE_PROFILES="gitlab-runner"
+                break
+            }
+
+            echo "Please answer y/n (or press Enter)."
+            echo ""
+        done
     fi
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
-
-        read -p "Register a new GitLab Runner? (y/N): " CONFIRM
         echo ""
 
-        if [[ "$CONFIRM" == "y" ]]; then
-            COMPOSE_PROFILES="gitlab-register,gitlab-runner"
-        else
-            COMPOSE_PROFILES=""
-        fi
+        while :; do
+            read -p "Register a new GitLab Runner? (y/N): " CONFIRM
+            echo ""
+            CONFIRM="${CONFIRM,,}"
+            [[ -z "$CONFIRM" ]] && CONFIRM="n"
+
+            [[ "$CONFIRM" == "y" ]] && {
+                COMPOSE_PROFILES="gitlab-register,gitlab-runner"
+                break
+            }
+
+            [[ "$CONFIRM" == "n" ]] && {
+                COMPOSE_PROFILES=""
+                break
+            }
+
+            echo "Please answer y/n (or press Enter)."
+            echo ""
+        done
     fi
-}
 
 # Display configuration and ask user to confirm
 confirm_and_save_configuration() {
