@@ -263,7 +263,7 @@ prompt_for_configuration() {
             echo ""
         done
     fi
-
+}
 # Display configuration and ask user to confirm
 confirm_and_save_configuration() {
     CONFIG_LINES=(
