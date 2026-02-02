@@ -87,13 +87,13 @@ confirm_prompt() {
     fi
 
     if [ -z "$input" ] && [ -z "$nullable" ]; then
-        echo "Value can't be empty. Try again."
+        echo "Value can't be empty. Try again." >&2
       continue
     fi
 
     if [ -n "$validator" ]; then
       if [[ ! "$input" =~ $validator ]]; then
-        echo "Value validation error. Try again"
+        echo "Value validation error. Try again" >&2
         continue
       fi
     fi
