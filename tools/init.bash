@@ -380,8 +380,21 @@ setup_containers() {
         echo ""
 
         if [[ "$CONFIRM" == "y" ]]; then
-            echo "Clearing 'vol' directory..."
-            rm -rf "${VOL_DIR:?}"/*
+            echo "DANGER: This action is irreversible."
+            echo "To confirm deletion, type REMOVE."
+            echo "Anything else (or Enter) will cancel and continue installation."
+            echo ""
+
+            CONFIRM_WORD="$(confirm_prompt "Type REMOVE to confirm" '^[a-zA-Z]+$' "" "nullable")"
+            CONFIRM_WORD="${CONFIRM_WORD,,}"
+            echo ""
+
+            if [[ "$CONFIRM_WORD" == "remove" ]]; then
+                echo "Clearing 'vol' directory..."
+                rm -rf -- "${VOL_DIR:?}/"*
+            else
+                echo "Deletion cancelled. Continuing installation."
+            fi
         fi
     fi
 
