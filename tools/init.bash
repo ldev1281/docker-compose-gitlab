@@ -251,7 +251,7 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' "n")"
+        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' 'n')"
         CONFIRM="${CONFIRM,,}"
         echo ""
 
@@ -375,7 +375,7 @@ setup_containers() {
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         echo ""
 
-        CONFIRM="$(confirm_prompt "Clear it now? (y/N)" '^[yYnN]$' "N")"
+        CONFIRM="$(confirm_prompt "Clear it now? (y/N)" '^[yYnN]$' 'N')"
         CONFIRM="${CONFIRM,,}"
         echo ""
 
