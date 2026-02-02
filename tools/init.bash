@@ -68,21 +68,39 @@ create_backup_tasks() {
     done
 }
 
-confirm_yn() {
-    local PROMPT="$1"
-    local CONFIRM
+confirm_prompt() {
+  local prompt="$1"
+  local validator="${2-}"
+  local default="${3-}"
+  local nullable="${4-}"
+  local input
 
-    while :; do
-        read -p "$PROMPT (y/n): " CONFIRM
-        echo ""
-        CONFIRM="${CONFIRM,,}"
+  while true; do
+    if [ -n "$default" ]; then
+      read -r -p "$prompt [$default]: " input
+    else
+      read -r -p "$prompt: " input
+    fi
 
-        [[ "$CONFIRM" == "y" ]] && return 0
-        [[ "$CONFIRM" == "n" ]] && return 1
+    if [ -z "$input" ] && [ -n "$default" ]; then
+      input="$default"
+    fi
 
-        echo "Please answer y or n."
-        echo ""
-    done
+    if [ -z "$input" ] && [ -z "$nullable" ]; then
+        echo "Value can't be empty. Try again."
+      continue
+    fi
+
+    if [ -n "$validator" ]; then
+      if [[ ! "$input" =~ $validator ]]; then
+        echo "Value validation error. Try again"
+        continue
+      fi
+    fi
+
+    echo "$input"
+    break
+  done
 }
 
 # Load existing configuration from .env file
@@ -233,7 +251,11 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        if confirm_yn "Remove current GitLab Runner?"; then
+        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' "n")"
+        CONFIRM="${CONFIRM,,}"
+        echo ""
+
+        if [[ "$CONFIRM" == "y" ]]; then
             rm -f "$RUNNER_CONFIG_FILE"
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
@@ -246,7 +268,11 @@ prompt_for_configuration() {
         echo "GitLab Runner is not registered (config.toml not found)."
         echo ""
 
-        if confirm_yn "Register a new GitLab Runner?"; then
+        CONFIRM="$(confirm_prompt "Register a new GitLab Runner? (y/n)" '^[yYnN]$')"
+        CONFIRM="${CONFIRM,,}"
+        echo ""
+
+        if [[ "$CONFIRM" == "y" ]]; then
             COMPOSE_PROFILES="gitlab-register,gitlab-runner"
         else
             COMPOSE_PROFILES=""
@@ -323,7 +349,10 @@ confirm_and_save_configuration() {
     echo "-----------------------------------------------------"
     echo ""
 
-    if ! confirm_yn "Proceed with this configuration?"; then
+    CONFIRM="$(confirm_prompt "Proceed with this configuration? (y/n)" '^[yYnN]$')"
+    CONFIRM="${CONFIRM,,}"
+
+    if [[ "$CONFIRM" == "n" ]]; then
         echo "Configuration aborted by user."
         exit 1
     fi
@@ -345,7 +374,12 @@ setup_containers() {
         echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         echo ""
-        if confirm_yn "Clear it now?"; then
+
+        CONFIRM="$(confirm_prompt "Clear it now? (y/n)" '^[yYnN]$')"
+        CONFIRM="${CONFIRM,,}"
+        echo ""
+
+        if [[ "$CONFIRM" == "y" ]]; then
             echo "Clearing 'vol' directory..."
             rm -rf "${VOL_DIR:?}"/*
         fi
