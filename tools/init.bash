@@ -68,6 +68,23 @@ create_backup_tasks() {
     done
 }
 
+confirm_yn() {
+    local PROMPT="$1"
+    local CONFIRM
+
+    while :; do
+        read -p "$PROMPT (y/n): " CONFIRM
+        echo ""
+        CONFIRM="${CONFIRM,,}"
+
+        [[ "$CONFIRM" == "y" ]] && return 0
+        [[ "$CONFIRM" == "n" ]] && return 1
+
+        echo "Please answer y or n."
+        echo ""
+    done
+}
+
 # Load existing configuration from .env file
 load_existing_env() {
     set -o allexport
@@ -216,54 +233,27 @@ prompt_for_configuration() {
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
 
-        while :; do
-            read -p "Remove current GitLab Runner? (y/N): " CONFIRM
+        if confirm_yn "Remove current GitLab Runner?"; then
+            rm -f "$RUNNER_CONFIG_FILE"
+            echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
-            CONFIRM="${CONFIRM,,}"
-            [[ -z "$CONFIRM" ]] && CONFIRM="n"
-
-            [[ "$CONFIRM" == "y" ]] && {
-                rm -f "$RUNNER_CONFIG_FILE"
-                echo "Removed: $RUNNER_CONFIG_FILE"
-                echo ""
-                break
-            }
-
-            [[ "$CONFIRM" == "n" ]] && {
-                COMPOSE_PROFILES="gitlab-runner"
-                break
-            }
-
-            echo "Please answer y/n (or press Enter)."
-            echo ""
-        done
+        else
+            COMPOSE_PROFILES="gitlab-runner"
+        fi
     fi
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
         echo ""
 
-        while :; do
-            read -p "Register a new GitLab Runner? (y/N): " CONFIRM
-            echo ""
-            CONFIRM="${CONFIRM,,}"
-            [[ -z "$CONFIRM" ]] && CONFIRM="n"
-
-            [[ "$CONFIRM" == "y" ]] && {
-                COMPOSE_PROFILES="gitlab-register,gitlab-runner"
-                break
-            }
-
-            [[ "$CONFIRM" == "n" ]] && {
-                COMPOSE_PROFILES=""
-                break
-            }
-
-            echo "Please answer y/n (or press Enter)."
-            echo ""
-        done
+        if confirm_yn "Register a new GitLab Runner?"; then
+            COMPOSE_PROFILES="gitlab-register,gitlab-runner"
+        else
+            COMPOSE_PROFILES=""
+        fi
     fi
 }
+
 # Display configuration and ask user to confirm
 confirm_and_save_configuration() {
     CONFIG_LINES=(
@@ -333,11 +323,10 @@ confirm_and_save_configuration() {
     echo "-----------------------------------------------------"
     echo ""
 
-    while :; do
-        read -p "Proceed with this configuration? (y/n): " CONFIRM
-        [[ "$CONFIRM" == "y" ]] && break
-        [[ "$CONFIRM" == "n" ]] && { echo "Configuration aborted by user."; exit 1; }
-    done
+    if ! confirm_yn "Proceed with this configuration?"; then
+        echo "Configuration aborted by user."
+        exit 1
+    fi
 
     printf "%s\n" "${CONFIG_LINES[@]}" >"$ENV_FILE"
     echo ".env file saved to $ENV_FILE"
@@ -355,9 +344,8 @@ setup_containers() {
         echo "The 'vol' directory exists:"
         echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
-        read -p "Clear it now? (y/N): " CONFIRM
         echo ""
-        if [[ "$CONFIRM" == "y" ]]; then
+        if confirm_yn "Clear it now?"; then
             echo "Clearing 'vol' directory..."
             rm -rf "${VOL_DIR:?}"/*
         fi
