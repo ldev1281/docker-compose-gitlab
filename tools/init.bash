@@ -250,12 +250,9 @@ prompt_for_configuration() {
         echo "Existing GitLab Runner configuration found at:"
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
-
         CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' 'n')"
-        CONFIRM="${CONFIRM,,}"
-        echo ""
 
-        if [[ "$CONFIRM" == "y" ]]; then
+        if [[ "${CONFIRM,,}" == "y" ]]; then
             rm -f "$RUNNER_CONFIG_FILE"
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
@@ -267,12 +264,9 @@ prompt_for_configuration() {
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
         echo ""
-
         CONFIRM="$(confirm_prompt "Register a new GitLab Runner? (y/n)" '^[yYnN]$')"
-        CONFIRM="${CONFIRM,,}"
-        echo ""
 
-        if [[ "$CONFIRM" == "y" ]]; then
+        if [[ "${CONFIRM,,}" == "y" ]]; then
             COMPOSE_PROFILES="gitlab-register,gitlab-runner"
         else
             COMPOSE_PROFILES=""
@@ -348,11 +342,9 @@ confirm_and_save_configuration() {
     done
     echo "-----------------------------------------------------"
     echo ""
-
     CONFIRM="$(confirm_prompt "Proceed with this configuration? (y/n)" '^[yYnN]$')"
-    CONFIRM="${CONFIRM,,}"
 
-    if [[ "$CONFIRM" == "n" ]]; then
+    if [[ "${CONFIRM,,}" == "n" ]]; then
         echo "Configuration aborted by user."
         exit 1
     fi
@@ -374,22 +366,16 @@ setup_containers() {
         echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
         echo ""
-
         CONFIRM="$(confirm_prompt "Clear it now? (y/N)" '^[yYnN]$' 'N')"
-        CONFIRM="${CONFIRM,,}"
-        echo ""
 
-        if [[ "$CONFIRM" == "y" ]]; then
+        if [[ "${CONFIRM,,}" == "y" ]]; then
             echo "DANGER: This action is irreversible."
             echo "To confirm deletion, type REMOVE."
             echo "Anything else (or Enter) will cancel and continue installation."
             echo ""
-
             CONFIRM_WORD="$(confirm_prompt "Type REMOVE to confirm" '^[a-zA-Z]+$' "" "nullable")"
-            CONFIRM_WORD="${CONFIRM_WORD,,}"
-            echo ""
-
-            if [[ "$CONFIRM_WORD" == "remove" ]]; then
+            
+            if [[ "${CONFIRM_WORD,,}" == "remove" ]]; then
                 echo "Clearing 'vol' directory..."
                 rm -rf -- "${VOL_DIR:?}/"*
             else
