@@ -155,6 +155,7 @@ services:
       - "--docker-volumes=/var/run/docker.sock:/var/run/docker.sock"
       - "--docker-volumes=/cache"
       - "--docker-network-mode=proxy-client-gitlab-runner"
+      - "--docker-pull-policy=if-not-present"
       - "--env=HTTP_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=HTTPS_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
       - "--env=ALL_PROXY=socks5h://${GITLAB_RUNNER_PROXY_SOCKS5H_HOST}:${GITLAB_RUNNER_PROXY_SOCKS5H_PORT}"
