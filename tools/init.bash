@@ -68,6 +68,41 @@ create_backup_tasks() {
     done
 }
 
+confirm_prompt() {
+  local prompt="$1"
+  local validator="${2-}"
+  local default="${3-}"
+  local nullable="${4-}"
+  local input
+
+  while true; do
+    if [ -n "$default" ]; then
+      read -r -p "$prompt [$default]: " input
+    else
+      read -r -p "$prompt: " input
+    fi
+
+    if [ -z "$input" ] && [ -n "$default" ]; then
+      input="$default"
+    fi
+
+    if [ -z "$input" ] && [ -z "$nullable" ]; then
+        echo "Value can't be empty. Try again." >&2
+      continue
+    fi
+
+    if [ -n "$validator" ]; then
+      if [[ ! "$input" =~ $validator ]]; then
+        echo "Value validation error. Try again" >&2
+        continue
+      fi
+    fi
+
+    echo "$input"
+    break
+  done
+}
+
 # Load existing configuration from .env file
 load_existing_env() {
     set -o allexport
@@ -215,11 +250,9 @@ prompt_for_configuration() {
         echo "Existing GitLab Runner configuration found at:"
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
+        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' 'n')"
 
-        read -p "Remove currrent GitLab Runner? (y/N): " CONFIRM
-        echo ""
-
-        if [[ "$CONFIRM" == "y" ]]; then
+        if [[ "${CONFIRM,,}" == "y" ]]; then
             rm -f "$RUNNER_CONFIG_FILE"
             echo "Removed: $RUNNER_CONFIG_FILE"
             echo ""
@@ -230,11 +263,10 @@ prompt_for_configuration() {
 
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
-
-        read -p "Register a new GitLab Runner? (y/N): " CONFIRM
         echo ""
+        CONFIRM="$(confirm_prompt "Register a new GitLab Runner? (y/n)" '^[yYnN]$')"
 
-        if [[ "$CONFIRM" == "y" ]]; then
+        if [[ "${CONFIRM,,}" == "y" ]]; then
             COMPOSE_PROFILES="gitlab-register,gitlab-runner"
         else
             COMPOSE_PROFILES=""
@@ -310,12 +342,12 @@ confirm_and_save_configuration() {
     done
     echo "-----------------------------------------------------"
     echo ""
+    CONFIRM="$(confirm_prompt "Proceed with this configuration? (y/n)" '^[yYnN]$')"
 
-    while :; do
-        read -p "Proceed with this configuration? (y/n): " CONFIRM
-        [[ "$CONFIRM" == "y" ]] && break
-        [[ "$CONFIRM" == "n" ]] && { echo "Configuration aborted by user."; exit 1; }
-    done
+    if [[ "${CONFIRM,,}" == "n" ]]; then
+        echo "Configuration aborted by user."
+        exit 1
+    fi
 
     printf "%s\n" "${CONFIG_LINES[@]}" >"$ENV_FILE"
     echo ".env file saved to $ENV_FILE"
@@ -333,11 +365,22 @@ setup_containers() {
         echo "The 'vol' directory exists:"
         echo " - In case of a new install type 'y' to clear its contents. WARNING! This will remove all previous configuration files and stored data (including GitLab Runner config)."
         echo " - In case of an upgrade/installing a new application type 'n' (or press Enter)."
-        read -p "Clear it now? (y/N): " CONFIRM
         echo ""
-        if [[ "$CONFIRM" == "y" ]]; then
-            echo "Clearing 'vol' directory..."
-            rm -rf "${VOL_DIR:?}"/*
+        CONFIRM="$(confirm_prompt "Clear it now? (y/N)" '^[yYnN]$' 'N')"
+
+        if [[ "${CONFIRM,,}" == "y" ]]; then
+            echo "DANGER: This action is irreversible."
+            echo "To confirm deletion, type REMOVE."
+            echo "Anything else (or Enter) will cancel and continue installation."
+            echo ""
+            CONFIRM_WORD="$(confirm_prompt "Type REMOVE to confirm" '^[a-zA-Z]+$' "" "nullable")"
+            
+            if [[ "${CONFIRM_WORD,,}" == "remove" ]]; then
+                echo "Clearing 'vol' directory..."
+                rm -rf -- "${VOL_DIR:?}/"*
+            else
+                echo "Deletion cancelled. Continuing installation."
+            fi
         fi
     fi
 
