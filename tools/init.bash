@@ -250,7 +250,7 @@ prompt_for_configuration() {
         echo "Existing GitLab Runner configuration found at:"
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
-        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' 'n')"
+        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/N)" '^[yYnN]$' 'N')"
 
         if [[ "${CONFIRM,,}" == "y" ]]; then
             rm -f "$RUNNER_CONFIG_FILE"
@@ -264,7 +264,7 @@ prompt_for_configuration() {
     if [[ ! -f "$RUNNER_CONFIG_FILE" ]]; then
         echo "GitLab Runner is not registered (config.toml not found)."
         echo ""
-        CONFIRM="$(confirm_prompt "Register a new GitLab Runner? (y/n)" '^[yYnN]$')"
+        CONFIRM="$(confirm_prompt "Register a new GitLab Runner? (y/N)" '^[yYnN]$' 'N')"
 
         if [[ "${CONFIRM,,}" == "y" ]]; then
             COMPOSE_PROFILES="gitlab-register,gitlab-runner"
