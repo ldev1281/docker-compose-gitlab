@@ -16,8 +16,8 @@ REQUIRED_TOOLS="docker limbo-backup.bash"
 REQUIRED_NETS="proxy-client-gitlab"
 BACKUP_TASKS="10-gitlab.conf.bash"
 
-CURRENT_GITLAB_VERSION="18.3.6-ee.0"
-CURRENT_GITLAB_RUNNER_VERSION="v18.3.1"
+CURRENT_GITLAB_VERSION="18.5.5-ee.0"
+CURRENT_GITLAB_RUNNER_VERSION="v18.5.0"
 
 # GitLab Runner config directory and file
 RUNNER_CONFIG_DIR="${VOL_DIR}/gitlab-runner"
