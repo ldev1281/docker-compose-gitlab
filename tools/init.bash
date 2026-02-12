@@ -250,7 +250,7 @@ prompt_for_configuration() {
         echo "Existing GitLab Runner configuration found at:"
         echo "  $RUNNER_CONFIG_FILE"
         echo ""
-        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/n)" '^[yYnN]$' 'n')"
+        CONFIRM="$(confirm_prompt "Remove current GitLab Runner? (y/N)" '^[yYnN]$' 'N')"
 
         if [[ "${CONFIRM,,}" == "y" ]]; then
             rm -f "$RUNNER_CONFIG_FILE"
